@@ -79,7 +79,7 @@
             (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
             (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
             cdkDrag (cdkDragEnded)="onDragEnded($event, el.id)"
-            (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y) || null)">
+            (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y, el.id) || null)">
 
             <!-- Element Handles (Elementor-style) -->
             <div class="element-handle" *ngIf="['section', 'column'].includes(el.type)">

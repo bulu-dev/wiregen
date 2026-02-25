@@ -64,6 +64,84 @@ export class EditorService {
         return page.elements[id] || null;
     });
 
+    getElementAbsolutePosition(id: string, elements?: Record<string, WireframeElement>): { left: number, top: number } {
+        const page = this.activePage();
+        const el = (elements || page.elements)[id];
+        if (!el) return { left: 0, top: 0 };
+
+        if (!el.parentId) return { left: el.styles.left, top: el.styles.top };
+
+        const parentPos = this.getElementAbsolutePosition(el.parentId, elements || page.elements);
+        return {
+            left: parentPos.left + el.styles.left,
+            top: parentPos.top + el.styles.top
+        };
+    }
+
+    reparentElement(id: string, newParentId?: string, targetAbs?: { left: number, top: number }) {
+        this.project.update(p => {
+            const activeIdx = p.pages.findIndex(pg => pg.id === p.activePageId);
+            if (activeIdx === -1) return p;
+
+            const page = { ...p.pages[activeIdx] };
+            const elements = { ...page.elements };
+            const el = elements[id];
+            if (!el) return p;
+
+            // Use target absolute position or current absolute position
+            const absPos = targetAbs || this.getElementAbsolutePosition(id, elements);
+
+            // Remove from old parent
+            if (el.parentId && elements[el.parentId]) {
+                elements[el.parentId] = {
+                    ...elements[el.parentId],
+                    children: (elements[el.parentId].children || []).filter(cid => cid !== id)
+                };
+            } else {
+                page.rootElements = page.rootElements.filter(rid => rid !== id);
+            }
+
+            // Calculate new relative position
+            let newRelativeX = absPos.left;
+            let newRelativeY = absPos.top;
+
+            if (newParentId && elements[newParentId]) {
+                const newParentAbs = this.getElementAbsolutePosition(newParentId, elements);
+                newRelativeX -= newParentAbs.left;
+                newRelativeY -= newParentAbs.top;
+
+                // Add to new parent (ensure no duplicates)
+                const children = elements[newParentId].children || [];
+                if (!children.includes(id)) {
+                    elements[newParentId] = {
+                        ...elements[newParentId],
+                        children: [...children, id]
+                    };
+                }
+            } else {
+                // Add to root (ensure no duplicates)
+                if (!page.rootElements.includes(id)) {
+                    page.rootElements = [...page.rootElements, id];
+                }
+            }
+
+            // Update element
+            elements[id] = {
+                ...el,
+                parentId: (newParentId === el.id) ? el.parentId : newParentId, // Prevent self-nesting
+                styles: {
+                    ...el.styles,
+                    left: newRelativeX,
+                    top: newRelativeY
+                }
+            };
+
+            const pages = [...p.pages];
+            pages[activeIdx] = { ...page, elements };
+            return { ...p, pages };
+        });
+    }
+
     // Page Management
     addPage(name: string = 'New Page') {
         const newPage: WireframePage = {

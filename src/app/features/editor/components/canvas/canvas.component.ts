@@ -63,14 +63,15 @@ export class CanvasComponent {
     this.translateY = 0;
   }
 
-  public findContainerAt(x: number, y: number): string | undefined {
+  public findContainerAt(x: number, y: number, excludeId?: string): string | undefined {
     const elements = document.elementsFromPoint(x, y);
     for (const el of elements) {
       const id = el.id;
+      if (id === excludeId) continue;
       const page = this.editor.activePage();
       if (id && page.elements[id]) {
         const wireEl = page.elements[id];
-        if (wireEl && ['container', 'section', 'article', 'grid', 'flex'].includes(wireEl.type)) {
+        if (wireEl && ['container', 'section', 'article', 'grid', 'flex', 'column'].includes(wireEl.type)) {
           return id;
         }
       }
@@ -96,9 +97,15 @@ export class CanvasComponent {
     const guides: any[] = [];
     const threshold = 5;
 
-    elements.forEach(el => {
-      const elX = el.styles.left;
-      const elY = el.styles.top;
+    const elementsWithPos = elements.map(el => ({
+      el,
+      abs: this.editor.getElementAbsolutePosition(el.id)
+    }));
+
+    elementsWithPos.forEach(item => {
+      const el = item.el;
+      const elX = item.abs.left;
+      const elY = item.abs.top;
       const elW = el.styles.width;
       const elH = el.styles.height;
       const elRight = elX + elW;
@@ -125,12 +132,14 @@ export class CanvasComponent {
 
     // Spacing Guides (Check horizontal/vertical sequences)
     // Horizontal spacing (leftward neighbor sequence)
-    const leftNeighbors = elements.filter(el => (el.styles.left + el.styles.width) < currentX).sort((a, b) => (b.styles.left + b.styles.width) - (a.styles.left + a.styles.width));
+    const leftNeighbors = elementsWithPos.filter(item => (item.abs.left + item.el.styles.width) < currentX)
+      .sort((a, b) => (b.abs.left + b.el.styles.width) - (a.abs.left + a.el.styles.width));
+
     if (leftNeighbors.length >= 2) {
       const b = leftNeighbors[0];
       const a = leftNeighbors[1];
-      const dist1 = b.styles.left - (a.styles.left + a.styles.width);
-      const dist2 = currentX - (b.styles.left + b.styles.width);
+      const dist1 = b.abs.left - (a.abs.left + a.el.styles.width);
+      const dist2 = currentX - (b.abs.left + b.el.styles.width);
       if (dist1 > 10 && Math.abs(dist1 - dist2) < threshold) {
         guides.push({
           id: `spacing-x-left`,
@@ -143,12 +152,14 @@ export class CanvasComponent {
     }
 
     // Vertical spacing (upward neighbor sequence)
-    const topNeighbors = elements.filter(el => (el.styles.top + el.styles.height) < currentY).sort((a, b) => (b.styles.top + b.styles.height) - (a.styles.top + a.styles.height));
+    const topNeighbors = elementsWithPos.filter(item => (item.abs.top + item.el.styles.height) < currentY)
+      .sort((a, b) => (b.abs.top + b.el.styles.height) - (a.abs.top + a.el.styles.height));
+
     if (topNeighbors.length >= 2) {
       const b = topNeighbors[0];
       const a = topNeighbors[1];
-      const dist1 = b.styles.top - (a.styles.top + a.styles.height);
-      const dist2 = currentY - (b.styles.top + b.styles.height);
+      const dist1 = b.abs.top - (a.abs.top + a.el.styles.height);
+      const dist2 = currentY - (b.abs.top + b.el.styles.height);
       if (dist1 > 10 && Math.abs(dist1 - dist2) < threshold) {
         guides.push({
           id: `spacing-y-top`,
@@ -208,7 +219,16 @@ export class CanvasComponent {
       y = Math.max(0, Math.min(y, page.height - elHeight));
 
       const parentId = this.findContainerAt(event.dropPoint.x, event.dropPoint.y);
-      this.editor.addElement(type, x, y, parentId);
+      let finalX = x;
+      let finalY = y;
+
+      if (parentId) {
+        const parentPos = this.editor.getElementAbsolutePosition(parentId);
+        finalX -= parentPos.left;
+        finalY -= parentPos.top;
+      }
+
+      this.editor.addElement(type, finalX, finalY, parentId);
       this.activeDropTarget.set(null);
     }
   }
@@ -229,7 +249,8 @@ export class CanvasComponent {
     newX = Math.max(0, Math.min(newX, 1440 - elWidth));
     newY = Math.max(0, Math.min(newY, page.height - elHeight));
 
-    this.editor.updateStyles(id, { left: newX, top: newY });
+    const newParentId = this.findContainerAt(itemRect.left + itemRect.width / 2, itemRect.top + itemRect.height / 2, id);
+    this.editor.reparentElement(id, newParentId, { left: newX, top: newY });
 
     // Auto-size parent if needed
     const parentId = this.editor.activePage().elements[id]?.parentId;
