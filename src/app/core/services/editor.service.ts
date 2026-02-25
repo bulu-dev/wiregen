@@ -209,7 +209,7 @@ export class EditorService {
                     backgroundColor: this.getDefaultColor(type),
                     color: '#333333',
                     borderRadius: 4,
-                    padding: 16,
+                    padding: 0,
                     zIndex: maxZ + 1,
                     display: (type === 'flex' || type === 'grid' || type === 'section' || type === 'column') ? 'flex' : 'block'
                 },
