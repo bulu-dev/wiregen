@@ -1,19 +1,65 @@
 <aside class="sidebar">
-    <div class="sidebar-header">
-        <h2>Elements</h2>
-    </div>
-    <div class="element-list" cdkDropList [cdkDropListConnectedTo]="['canvas-list']" cdkDropListOrientation="vertical">
-        @for (item of items; track item.type) {
-        <div class="element-item" cdkDrag [cdkDragData]="item.type">
-            <span class="icon">{{ item.icon }}</span>
-            <span class="label">{{ item.label }}</span>
-
-            <!-- Drag Preview -->
-            <div *cdkDragPreview class="drag-preview">
-                <span class="icon">{{ item.icon }}</span>
-                <span class="label">{{ item.label }}</span>
-            </div>
+    <!-- Page Manager -->
+    <div class="sidebar-section">
+        <div class="section-header">
+            <h2>Pages</h2>
+            <button class="btn-icon" (click)="addPage()">
+                <span class="material-icons">add</span>
+            </button>
         </div>
-        }
+        <div class="page-list">
+            @for (page of editor.project().pages; track page.id) {
+            <div class="page-item" [class.active]="editor.project().activePageId === page.id"
+                (click)="editor.setActivePage(page.id)">
+                <span class="material-icons">description</span>
+                <span class="label">{{ page.name }}</span>
+                @if (editor.project().pages.length > 1) {
+                <button class="btn-delete" (click)="$event.stopPropagation(); editor.deletePage(page.id)">
+                    <span class="material-icons">close</span>
+                </button>
+                }
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Layout Elements -->
+    <div class="sidebar-section">
+        <div class="section-header">
+            <h2>Structure</h2>
+        </div>
+        <div class="element-list" cdkDropList [cdkDropListConnectedTo]="['canvas-list']"
+            cdkDropListOrientation="vertical">
+            @for (item of structureItems; track item.type) {
+            <div class="element-item" cdkDrag [cdkDragData]="item.type">
+                <span class="material-icons">{{ item.icon }}</span>
+                <span class="label">{{ item.label }}</span>
+                <div *cdkDragPreview class="drag-preview">
+                    <span class="material-icons">{{ item.icon }}</span>
+                    <span class="label">{{ item.label }}</span>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Basic Elements -->
+    <div class="sidebar-section">
+        <div class="section-header">
+            <h2>Components</h2>
+        </div>
+        <div class="element-list" cdkDropList [cdkDropListConnectedTo]="['canvas-list']"
+            cdkDropListOrientation="vertical">
+            @for (item of basicItems; track item.type) {
+            <div class="element-item" cdkDrag [cdkDragData]="item.type">
+                <span class="material-icons">{{ item.icon }}</span>
+                <span class="label">{{ item.label }}</span>
+                <div *cdkDragPreview class="drag-preview">
+                    <span class="material-icons">{{ item.icon }}</span>
+                    <span class="label">{{ item.label }}</span>
+                </div>
+            </div>
+            }
+        </div>
     </div>
 </aside>

@@ -5,40 +5,54 @@
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
         <div class="canvas" id="canvas-list" cdkDropList [cdkDropListConnectedTo]="[]"
             (cdkDropListDropped)="onDrop($event)">
-            @for (el of editor.allElements(); track el.id) {
-            <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementId() === el.id"
-                [style.width.px]="el.styles.width" [style.height.px]="el.styles.height" [style.top.px]="el.styles.top"
-                [style.left.px]="el.styles.left" [style.background-color]="el.styles.backgroundColor"
-                [style.borderRadius.px]="el.styles.borderRadius" [style.color]="el.styles.color"
-                [style.fontSize.px]="el.styles.fontSize || 14" [style.fontWeight]="el.styles.fontWeight || 400"
-                [style.border-width.px]="el.styles.borderWidth" [style.border-color]="el.styles.borderColor"
-                [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
-                [style.justify-content]="el.styles.justifyContent" [style.align-items]="el.styles.alignItems"
-                [style.gap.px]="el.styles.gap" [style.padding.px]="el.styles.padding"
-                (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)" cdkDrag
-                [cdkDragBoundary]="'.canvas'" (cdkDragEnded)="onDragEnded($event, el.id)">
-
-                <div class="element-content" [class.no-pointer]="el.type !== 'container'">
-                    @if (el.type === 'text' || el.type === 'button') {
-                    {{ el.content }}
-                    } @else if (el.type === 'input') {
-                    <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
-                    } @else if (el.type === 'image') {
-                    @if (el.imageUrl) {
-                    <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
-                    } @else {
-                    <div class="image-placeholder">🖼️</div>
-                    }
-                    }
-                </div>
-
-                @if (editor.selectedElementId() === el.id) {
-                <div class="resize-handle bottom-right" (mousedown)="startResize($event, el.id)"></div>
-                }
-            </div>
+            @for (elId of editor.activePage().rootElements; track elId) {
+            <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
             }
         </div>
     </div>
+
+    <ng-template #elementTmpl let-id="id">
+        @if (editor.activePage().elements[id]; as el) {
+        <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementId() === el.id"
+            [style.width.px]="el.styles.width" [style.height.px]="el.styles.height" [style.top.px]="el.styles.top"
+            [style.left.px]="el.styles.left" [style.background-color]="el.styles.backgroundColor"
+            [style.borderRadius.px]="el.styles.borderRadius" [style.color]="el.styles.color"
+            [style.fontSize.px]="el.styles.fontSize || 14" [style.fontWeight]="el.styles.fontWeight || 400"
+            [style.border-width.px]="el.styles.borderWidth" [style.border-color]="el.styles.borderColor"
+            [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
+            [style.justify-content]="el.styles.justifyContent" [style.align-items]="el.styles.alignItems"
+            [style.gap.px]="el.styles.gap" [style.padding.px]="el.styles.padding"
+            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)" cdkDrag [cdkDragBoundary]="'.canvas'"
+            (cdkDragEnded)="onDragEnded($event, el.id)">
+
+            <div class="element-content"
+                [class.no-pointer]="!['container', 'section', 'article', 'grid', 'flex'].includes(el.type)">
+                @if (el.type === 'text' || el.type === 'button') {
+                {{ el.content }}
+                } @else if (el.type === 'input') {
+                <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
+                } @else if (el.type === 'image') {
+                @if (el.imageUrl) {
+                <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
+                } @else {
+                <div class="image-placeholder">🖼️</div>
+                }
+                }
+
+                <!-- Render Children -->
+                @if (el.children && el.children.length > 0) {
+                @for (childId of el.children; track childId) {
+                <ng-container *ngTemplateOutlet="elementTmpl; context: { id: childId }"></ng-container>
+                }
+                }
+            </div>
+
+            @if (editor.selectedElementId() === el.id) {
+            <div class="resize-handle bottom-right" (mousedown)="startResize($event, el.id)"></div>
+            }
+        </div>
+        }
+    </ng-template>
 
     <div class="canvas-actions">
         <span>Zoom: {{ (zoom * 100).toFixed(0) }}% | Pan: {{ translateX.toFixed(0) }}, {{ translateY.toFixed(0)

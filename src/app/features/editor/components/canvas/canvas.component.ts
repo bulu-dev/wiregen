@@ -62,10 +62,7 @@ export class CanvasComponent {
   }
 
   onDrop(event: any) {
-    // If the item was already in the canvas, do nothing (onDragEnded handles it)
-    if (event.previousContainer === event.container) {
-      return;
-    }
+    if (event.previousContainer === event.container) return;
 
     const type = event.item.data as ElementType;
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
@@ -73,15 +70,32 @@ export class CanvasComponent {
       const rect = canvasEl.getBoundingClientRect();
       const x = (event.dropPoint.x - rect.left) / this.zoom;
       const y = (event.dropPoint.y - rect.top) / this.zoom;
-      this.editor.addElement(type, x, y);
+
+      // Detect potential parent container
+      const parentId = this.findContainerAt(event.dropPoint.x, event.dropPoint.y);
+      this.editor.addElement(type, x, y, parentId);
     }
+  }
+
+  private findContainerAt(x: number, y: number): string | undefined {
+    // Basic hit test to find the front-most container
+    const elements = document.elementsFromPoint(x, y);
+    for (const el of elements) {
+      const id = el.id;
+      if (id && this.editor.project().pages.find(p => p.id === this.editor.project().activePageId)?.elements[id]) {
+        const wireEl = this.editor.project().pages.find(p => p.id === this.editor.project().activePageId)?.elements[id];
+        if (wireEl && ['container', 'section', 'article', 'grid', 'flex'].includes(wireEl.type)) {
+          return id;
+        }
+      }
+    }
+    return undefined;
   }
 
   onDragEnded(event: CdkDragEnd, id: string) {
     const { x, y } = event.distance;
-    const el = this.editor.project().elements[id];
+    const el = this.editor.activePage().elements[id];
     if (el) {
-      // Adjust movement for zoom
       this.editor.updateStyles(id, {
         left: el.styles.left + (x / this.zoom),
         top: el.styles.top + (y / this.zoom)
@@ -108,7 +122,7 @@ export class CanvasComponent {
   @HostListener('window:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
     if (this.isResizing && this.resizeId) {
-      const el = this.editor.project().elements[this.resizeId];
+      const el = this.editor.activePage().elements[this.resizeId];
       if (el) {
         const deltaX = (event.clientX - this.lastMouseX) / this.zoom;
         const deltaY = (event.clientY - this.lastMouseY) / this.zoom;

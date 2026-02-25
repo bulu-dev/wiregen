@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'input' | 'rect' | 'image' | 'container';
+export type ElementType = 'text' | 'button' | 'input' | 'rect' | 'image' | 'container' | 'section' | 'article' | 'grid' | 'flex';
 
 export interface ElementStyles {
   width: number;
@@ -18,6 +18,7 @@ export interface ElementStyles {
   alignItems?: string;
   gap?: number;
   fontWeight?: string | number;
+  gridTemplateColumns?: string;
 }
 
 export interface WireframeElement {
@@ -32,9 +33,16 @@ export interface WireframeElement {
   children?: string[]; // IDs of child elements
 }
 
-export interface WireframeProject {
+export interface WireframePage {
   id: string;
   name: string;
   elements: Record<string, WireframeElement>;
   rootElements: string[];
+}
+
+export interface WireframeProject {
+  id: string;
+  name: string;
+  pages: WireframePage[];
+  activePageId: string;
 }
