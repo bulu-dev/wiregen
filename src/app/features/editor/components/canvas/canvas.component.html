@@ -1,9 +1,10 @@
 <main class="canvas-container" [class.panning-mode]="isAltPressed()">
     <div class="canvas-viewport" (wheel)="onWheel($event)" (mousedown)="onMouseDown($event)"
-        (click)="onCanvasClick($event)"
+        (click)="onCanvasClick($event)" (contextmenu)="onCanvasContextMenu($event)"
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
         <div class="canvas" id="canvas-list" cdkDropList [cdkDropListConnectedTo]="[]"
-            (cdkDropListDropped)="onDrop($event)" [style.minHeight.px]="editor.activePage().height">
+            (cdkDropListDropped)="onDrop($event)" (contextmenu)="onCanvasContextMenu($event)"
+            [style.minHeight.px]="editor.activePage().height">
 
             <!-- Grid Overlay -->
             @if (editor.gridSettings().enabled) {
@@ -85,7 +86,8 @@
             [class.ant-march]="activeDropTarget() === el.id"
             (mousedown)="$event.stopPropagation(); editor.selectElement(el.id, $event.shiftKey)"
             (click)="editor.selectElement(el.id, $event.shiftKey); $event.stopPropagation()"
-            (contextmenu)="onContextMenu($event, el.id)" cdkDrag (cdkDragEnded)="onDragEnded($event, el.id)"
+            (contextmenu)="onContextMenu($event, el.id)" cdkDrag (cdkDragStarted)="onDragStarted($event, el.id)"
+            (cdkDragEnded)="onDragEnded($event, el.id)"
             (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y, el.id) || null)">
 
             <!-- Element Handles (Elementor-style) -->
