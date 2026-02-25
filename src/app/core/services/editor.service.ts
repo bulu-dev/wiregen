@@ -217,6 +217,10 @@ export class EditorService {
         }));
     }
 
+    renameProject(name: string) {
+        this.project.update(p => ({ ...p, name }));
+    }
+
     deletePage(id: string) {
         this.project.update(p => {
             if (p.pages.length <= 1) return p; // Keep at least one page
