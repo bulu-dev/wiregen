@@ -1,6 +1,6 @@
 .navbar {
     height: 60px;
-    background: #ffffff;
+    background: var(--bg-sidebar);
     border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
@@ -52,7 +52,7 @@
 }
 
 .btn-outline {
-    background: white;
+    background: var(--bg-sidebar);
     border: 1px solid var(--border);
     color: var(--text-main);
 }

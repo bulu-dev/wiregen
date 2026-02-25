@@ -19,6 +19,8 @@ export interface ElementStyles {
   gap?: number;
   fontWeight?: string | number;
   gridTemplateColumns?: string;
+  gridTemplateRows?: string;
+  flexWrap?: string;
 }
 
 export interface WireframeElement {
@@ -38,6 +40,7 @@ export interface WireframePage {
   name: string;
   elements: Record<string, WireframeElement>;
   rootElements: string[];
+  height: number;
 }
 
 export interface WireframeProject {

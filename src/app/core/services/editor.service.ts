@@ -13,7 +13,7 @@ export class EditorService {
         id: '1',
         name: 'Untitled Project',
         pages: [
-            { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [] }
+            { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000 }
         ],
         activePageId: ''
     });
@@ -27,6 +27,14 @@ export class EditorService {
 
     updateGridSettings(settings: Partial<{ enabled: boolean, sizeX: number, sizeY: number, snapEnabled: boolean }>) {
         this.gridSettings.update(s => ({ ...s, ...settings }));
+    }
+
+    theme = signal<'light' | 'dark'>('light');
+    clipboard = signal<WireframeElement | null>(null);
+
+    toggleTheme() {
+        this.theme.update(t => t === 'light' ? 'dark' : 'light');
+        document.body.classList.toggle('dark', this.theme() === 'dark');
     }
 
     constructor() {
@@ -62,7 +70,8 @@ export class EditorService {
             id: crypto.randomUUID(),
             name,
             elements: {},
-            rootElements: []
+            rootElements: [],
+            height: 2000
         };
         this.project.update(p => ({
             ...p,
@@ -221,11 +230,18 @@ export class EditorService {
         return ids;
     }
 
+    updatePageHeight(id: string, height: number) {
+        this.project.update(p => ({
+            ...p,
+            pages: p.pages.map(pg => pg.id === id ? { ...pg, height } : pg)
+        }));
+    }
+
     clearProject() {
         this.project.update(p => ({
             ...p,
             pages: [
-                { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [] }
+                { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000 }
             ],
             activePageId: '' // Will be reset
         }));
@@ -237,6 +253,95 @@ export class EditorService {
 
     selectElement(id: string | null) {
         this.selectedElementId.set(id);
+    }
+
+    copyElement(id: string) {
+        const el = this.activePage().elements[id];
+        if (el) {
+            this.clipboard.set(JSON.parse(JSON.stringify(el)));
+        }
+    }
+
+    pasteElement(parentId?: string) {
+        const source = this.clipboard();
+        if (!source) return;
+
+        const id = crypto.randomUUID();
+        const clone: WireframeElement = {
+            ...JSON.parse(JSON.stringify(source)),
+            id,
+            parentId,
+            styles: {
+                ...source.styles,
+                top: source.styles.top + 20,
+                left: source.styles.left + 20
+            }
+        };
+
+        this.project.update(p => {
+            const activeIdx = p.pages.findIndex(pg => pg.id === p.activePageId);
+            if (activeIdx === -1) return p;
+
+            const pages = [...p.pages];
+            const page = { ...pages[activeIdx] };
+            const elements = { ...page.elements, [id]: clone };
+            const rootElements = parentId ? page.rootElements : [...page.rootElements, id];
+
+            if (parentId && elements[parentId]) {
+                elements[parentId] = {
+                    ...elements[parentId],
+                    children: [...(elements[parentId].children || []), id]
+                };
+            }
+
+            page.elements = elements;
+            page.rootElements = rootElements;
+            pages[activeIdx] = page;
+            return { ...p, pages };
+        });
+
+        this.selectedElementId.set(id);
+    }
+
+    duplicateElement(id: string) {
+        this.copyElement(id);
+        this.pasteElement(this.activePage().elements[id]?.parentId);
+    }
+
+    updateContainerSize(containerId: string) {
+        this.project.update(p => {
+            const activeIdx = p.pages.findIndex(pg => pg.id === p.activePageId);
+            if (activeIdx === -1) return p;
+
+            const page = p.pages[activeIdx];
+            const container = page.elements[containerId];
+            if (!container || !container.children || container.children.length === 0) return p;
+
+            // Calculate bounding box of children
+            let maxY = 0;
+            container.children.forEach(childId => {
+                const child = page.elements[childId];
+                if (child) {
+                    const bottom = child.styles.top + child.styles.height;
+                    if (bottom > maxY) maxY = bottom;
+                }
+            });
+
+            const newHeight = maxY + (container.styles.padding || 16);
+            if (newHeight === container.styles.height) return p;
+
+            const pages = [...p.pages];
+            const updatedPage = { ...page };
+            updatedPage.elements = {
+                ...page.elements,
+                [containerId]: {
+                    ...container,
+                    styles: { ...container.styles, height: newHeight }
+                }
+            };
+            pages[activeIdx] = updatedPage;
+            return { ...p, pages };
+        });
     }
 
     private getDefaultColor(type: ElementType): string {

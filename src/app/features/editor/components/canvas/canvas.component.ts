@@ -112,6 +112,35 @@ export class CanvasComponent {
     this.alignmentGuides.set(guides);
   }
 
+  isAltPressed = signal(false);
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(event: KeyboardEvent) {
+    if (event.altKey) this.isAltPressed.set(true);
+
+    // Shortcuts
+    if (event.ctrlKey || event.metaKey) {
+      if (event.key === 'c') this.editor.copyElement(this.editor.selectedElementId() || '');
+      if (event.key === 'v') this.editor.pasteElement();
+      if (event.key === 'x') {
+        const id = this.editor.selectedElementId();
+        if (id) {
+          this.editor.copyElement(id);
+          this.editor.deleteElement(id);
+        }
+      }
+    }
+  }
+
+  @HostListener('window:keyup', ['$event'])
+  onKeyUp(event: KeyboardEvent) {
+    if (!event.altKey) this.isAltPressed.set(false);
+  }
+
+  private snap(val: number, step: number): number {
+    return Math.round(val / step) * step;
+  }
+
   onDrop(event: any) {
     if (event.previousContainer === event.container) return;
 
@@ -119,17 +148,25 @@ export class CanvasComponent {
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
     if (canvasEl) {
       const rect = canvasEl.getBoundingClientRect();
+      const page = this.editor.activePage();
       let x = (event.dropPoint.x - rect.left) / this.zoom;
       let y = (event.dropPoint.y - rect.top) / this.zoom;
 
-      // Snapping
-      if (this.editor.gridSettings().snapEnabled) {
-        x = this.snap(x, 1440 / this.editor.gridSettings().sizeX);
-        y = this.snap(y, 100);
+      // Snapping (Only if ALT is pressed) - Default to 8px finer grid or use grid settings
+      if (this.isAltPressed() && this.editor.gridSettings().snapEnabled) {
+        x = this.snap(x, 8);
+        y = this.snap(y, 8);
+      } else if (this.editor.gridSettings().snapEnabled && !this.isAltPressed()) {
+        // Normal snapping to major grid if enabled? 
+        // User said: "Smart Snapping: Nur wenn ich mit ALT + Linke Maustaste bewege soll es der Fall sein"
+        // So I will disable standard snapping unless ALT is held? 
+        // Or keep current grid snapping and make ALT "Smart/Fine"? 
+        // User specifically said "Smart Snapping: Only with ALT". 
+        // I will make it so snapping ONLY happens with ALT.
       }
 
       // Boundary Check
-      if (x < 0 || y < 0 || x > 1440 || y > 2000) {
+      if (x < 0 || y < 0 || x > 1440 || y > page.height) {
         this.showBoundaryError();
         return;
       }
@@ -143,30 +180,65 @@ export class CanvasComponent {
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
     const rect = canvasEl.getBoundingClientRect();
     const itemRect = event.source.element.nativeElement.getBoundingClientRect();
+    const page = this.editor.activePage();
 
     let newX = (itemRect.left - rect.left) / this.zoom;
     let newY = (itemRect.top - rect.top) / this.zoom;
 
-    // Snapping
-    if (this.editor.gridSettings().snapEnabled) {
-      newX = this.snap(newX, 1440 / this.editor.gridSettings().sizeX);
-      newY = this.snap(newY, 2000 / this.editor.gridSettings().sizeY);
+    // Snapping (Only if ALT is pressed)
+    if (this.isAltPressed() && this.editor.gridSettings().snapEnabled) {
+      newX = this.snap(newX, 8);
+      newY = this.snap(newY, 8);
     }
 
     // Boundary Check
-    if (newX < 0 || newY < 0 || newX + (itemRect.width / this.zoom) > 1440 || newY + (itemRect.height / this.zoom) > 2000) {
+    if (newX < 0 || newY < 0 || newX + (itemRect.width / this.zoom) > 1440 || newY + (itemRect.height / this.zoom) > page.height) {
       this.showBoundaryError();
       event.source.reset();
       return;
     }
 
     this.editor.updateStyles(id, { left: newX, top: newY });
+
+    // Auto-size parent if needed
+    const parentId = this.editor.activePage().elements[id]?.parentId;
+    if (parentId) {
+      this.editor.updateContainerSize(parentId);
+    }
+
     event.source.reset();
     this.alignmentGuides.set([]);
   }
 
-  private snap(val: number, step: number): number {
-    return Math.round(val / step) * step;
+  showContextMenu = false;
+  menuPos = { x: 0, y: 0 };
+  contextElementId = '';
+
+  onContextMenu(event: MouseEvent, id: string) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.showContextMenu = true;
+    this.contextElementId = id;
+    this.menuPos = { x: event.clientX, y: event.clientY };
+  }
+
+  onDuplicate() {
+    if (this.contextElementId) {
+      this.editor.duplicateElement(this.contextElementId);
+      this.showContextMenu = false;
+    }
+  }
+
+  onDelete() {
+    if (this.contextElementId) {
+      this.editor.deleteElement(this.contextElementId);
+      this.showContextMenu = false;
+    }
+  }
+
+  @HostListener('window:click')
+  closeMenus() {
+    this.showContextMenu = false;
   }
 
   private showBoundaryError() {
@@ -202,6 +274,10 @@ export class CanvasComponent {
           width: Math.max(20, el.styles.width + deltaX),
           height: Math.max(20, el.styles.height + deltaY)
         });
+
+        if (el.parentId) {
+          this.editor.updateContainerSize(el.parentId);
+        }
 
         this.lastMouseX = event.clientX;
         this.lastMouseY = event.clientY;

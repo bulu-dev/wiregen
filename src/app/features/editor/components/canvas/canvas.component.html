@@ -1,10 +1,10 @@
-<main class="canvas-container" (click)="onCanvasClick($event)" (wheel)="onWheel($event)"
-    (mousedown)="onMouseDown($event)">
+<main class="canvas-container">
 
-    <div class="canvas-viewport"
+    <div class="canvas-viewport" (wheel)="onWheel($event)" (mousedown)="onMouseDown($event)"
+        (click)="onCanvasClick($event)"
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
         <div class="canvas" id="canvas-list" cdkDropList [cdkDropListConnectedTo]="[]"
-            (cdkDropListDropped)="onDrop($event)">
+            (cdkDropListDropped)="onDrop($event)" [style.minHeight.px]="editor.activePage().height">
 
             <!-- Grid Overlay -->
             @if (editor.gridSettings().enabled) {
@@ -19,25 +19,55 @@
                 [style.top.px]="guide.type === 'h' ? guide.pos : 0"></div>
             }
 
+            <!-- Page Elements -->
             @for (elId of editor.activePage().rootElements; track elId) {
-            <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
+            <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }">
+            </ng-container>
+            }
+
+            <!-- Context Menu -->
+            @if (showContextMenu) {
+            <div class="context-menu" [style.top.px]="menuPos.y" [style.left.px]="menuPos.x" @fadeIn
+                (click)="$event.stopPropagation()">
+                <button (click)="onDuplicate()">
+                    <span class="material-icons">content_copy</span> Duplicate
+                </button>
+                <button (click)="onDelete()" class="danger">
+                    <span class="material-icons">delete</span> Delete
+                </button>
+            </div>
             }
         </div>
     </div>
 
     <ng-template #elementTmpl let-id="id">
         @if (editor.activePage().elements[id]; as el) {
-        <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementId() === el.id"
-            [style.width.px]="el.styles.width" [style.height.px]="el.styles.height" [style.top.px]="el.styles.top"
-            [style.left.px]="el.styles.left" [style.background-color]="el.styles.backgroundColor"
-            [style.borderRadius.px]="el.styles.borderRadius" [style.color]="el.styles.color"
-            [style.fontSize.px]="el.styles.fontSize || 14" [style.fontWeight]="el.styles.fontWeight || 400"
-            [style.border-width.px]="el.styles.borderWidth" [style.border-color]="el.styles.borderColor"
-            [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
-            [style.justify-content]="el.styles.justifyContent" [style.align-items]="el.styles.alignItems"
-            [style.gap.px]="el.styles.gap" [style.padding.px]="el.styles.padding"
-            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)" cdkDrag [cdkDragBoundary]="'.canvas'"
-            (cdkDragEnded)="onDragEnded($event, el.id)" (cdkDragMoved)="onDragMoved($event, el.id)">
+        <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementId() === el.id" [ngStyle]="{
+                'width.px': el.styles.width,
+                'height.px': el.styles.height,
+                'top.px': el.styles.top,
+                'left.px': el.styles.left,
+                'background-color': el.styles.backgroundColor,
+                'color': el.styles.color,
+                'font-size.px': el.styles.fontSize || 14,
+                'font-weight': el.styles.fontWeight || 400,
+                'border-radius.px': el.styles.borderRadius,
+                'border-width.px': el.styles.borderWidth,
+                'border-color': el.styles.borderColor,
+                'border-style': el.styles.borderWidth ? 'solid' : 'transparent',
+                'display': el.styles.display || 'flex',
+                'flex-direction': el.styles.flexDirection || 'row',
+                'justify-content': el.styles.justifyContent || 'flex-start',
+                'align-items': el.styles.alignItems || 'stretch',
+                'flex-wrap': el.styles.flexWrap || 'nowrap',
+                'gap.px': el.styles.gap || 0,
+                'padding.px': el.styles.padding,
+                'grid-template-columns': el.type === 'grid' ? el.styles.gridTemplateColumns : 'none',
+                'grid-template-rows': el.type === 'grid' ? el.styles.gridTemplateRows : 'none'
+            }" (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
+            (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
+            cdkDrag [cdkDragBoundary]="'.canvas'" (cdkDragEnded)="onDragEnded($event, el.id)"
+            (cdkDragMoved)="onDragMoved($event, el.id)">
 
             <div class="element-content"
                 [class.no-pointer]="!['container', 'section', 'article', 'grid', 'flex'].includes(el.type)">

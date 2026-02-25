@@ -1,6 +1,6 @@
 .sidebar {
     width: 260px;
-    background: white;
+    background: var(--bg-sidebar);
     border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
@@ -43,7 +43,7 @@
     color: var(--text-main);
 
     &:hover {
-        background: #f3f4f6;
+        background: var(--bg-main);
     }
 
     &.active {
@@ -96,12 +96,12 @@
     border: 1px solid var(--border);
     border-radius: var(--radius);
     cursor: grab;
-    background: white;
+    background: var(--bg-sidebar);
     transition: all 0.2s ease;
 
     &:hover {
         border-color: var(--primary);
-        background: #eff6ff;
+        background: var(--bg-main);
     }
 
     .material-icons {

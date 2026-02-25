@@ -7,6 +7,10 @@
         <span class="project-name">{{ editor.project().name }}</span>
     </div>
     <div class="actions">
+        <button class="btn btn-icon theme-toggle" (click)="editor.toggleTheme()"
+            [title]="'Switch to ' + (editor.theme() === 'light' ? 'dark' : 'light') + ' mode'">
+            <span class="material-icons">{{ editor.theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
+        </button>
         <button class="btn btn-outline" (click)="editor.clearProject()">Clear</button>
         <button class="btn btn-outline" (click)="exportService.previewProject()">Preview</button>
         <button class="btn btn-primary" (click)="onExport()">Export</button>

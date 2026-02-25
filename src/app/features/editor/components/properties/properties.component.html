@@ -55,23 +55,38 @@
                 </div>
             </div>
 
-            <div class="field-group" *ngIf="el.type === 'container' || el.type === 'rect'">
+            <div class="field-group" *ngIf="['container', 'flex', 'grid', 'section', 'article'].includes(el.type)">
                 <label>Flex Distribution</label>
                 <div class="flex-controls">
-                    <select [ngModel]="el.styles.justifyContent || 'center'"
+                    <select [ngModel]="el.styles.justifyContent || 'flex-start'"
                         (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
                         <option value="flex-start">Start</option>
                         <option value="center">Center</option>
                         <option value="flex-end">End</option>
                         <option value="space-between">Between</option>
                     </select>
-                    <select [ngModel]="el.styles.alignItems || 'center'"
+                    <select [ngModel]="el.styles.alignItems || 'stretch'"
                         (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
                         <option value="flex-start">Top</option>
                         <option value="center">Middle</option>
                         <option value="flex-end">Bottom</option>
+                        <option value="stretch">Stretch</option>
                     </select>
                 </div>
+                <div class="flex-wrap-ctrl" *ngIf="el.type === 'flex'">
+                    <label class="checkbox-label">
+                        <input type="checkbox" [ngModel]="el.styles.flexWrap === 'wrap'"
+                            (ngModelChange)="editor.updateStyles(el.id, { flexWrap: $event ? 'wrap' : 'nowrap' })">
+                        Flex Wrap
+                    </label>
+                </div>
+            </div>
+
+            <div class="field-group" *ngIf="el.type === 'grid'">
+                <label>Grid Config (Template Columns)</label>
+                <input type="text" [ngModel]="el.styles.gridTemplateColumns || 'repeat(3, 1fr)'"
+                    (ngModelChange)="editor.updateStyles(el.id, { gridTemplateColumns: $event })"
+                    placeholder="e.g. 1fr 2fr 1fr">
             </div>
         </div>
 
@@ -179,6 +194,11 @@
                     <label>Grid Y (Rows)</label>
                     <input type="number" [ngModel]="editor.gridSettings().sizeY"
                         (ngModelChange)="editor.updateGridSettings({ sizeY: $event })">
+                </div>
+                <div class="field">
+                    <label>Page Height (px)</label>
+                    <input type="number" [ngModel]="editor.activePage().height"
+                        (ngModelChange)="editor.updatePageHeight(editor.activePage().id, $event)">
                 </div>
             </div>
         </div>
