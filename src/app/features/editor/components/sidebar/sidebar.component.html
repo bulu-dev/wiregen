@@ -1,0 +1,19 @@
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <h2>Elements</h2>
+    </div>
+    <div class="element-list" cdkDropList [cdkDropListConnectedTo]="['canvas-list']" cdkDropListOrientation="vertical">
+        @for (item of items; track item.type) {
+        <div class="element-item" cdkDrag [cdkDragData]="item.type">
+            <span class="icon">{{ item.icon }}</span>
+            <span class="label">{{ item.label }}</span>
+
+            <!-- Drag Preview -->
+            <div *cdkDragPreview class="drag-preview">
+                <span class="icon">{{ item.icon }}</span>
+                <span class="label">{{ item.label }}</span>
+            </div>
+        </div>
+        }
+    </div>
+</aside>
