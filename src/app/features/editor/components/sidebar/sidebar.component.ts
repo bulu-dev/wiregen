@@ -24,16 +24,12 @@ export class SidebarComponent {
 
   structureItems: SidebarItem[] = [
     { type: 'section', label: 'Section', icon: 'segment' },
-    { type: 'article', label: 'Article', icon: 'article' },
-    { type: 'flex', label: 'Flex Box', icon: 'view_quilt' },
-    { type: 'grid', label: 'Grid Box', icon: 'grid_view' },
     { type: 'container', label: 'Container', icon: 'check_box_outline_blank' },
   ];
 
   basicItems: SidebarItem[] = [
     { type: 'text', label: 'Text', icon: 'title' },
     { type: 'button', label: 'Button', icon: 'smart_button' },
-    { type: 'input', label: 'Input', icon: 'edit_note' },
     { type: 'image', label: 'Image', icon: 'image' },
     { type: 'rect', label: 'Rectangle', icon: 'rectangle' },
   ];
@@ -56,25 +52,6 @@ export class SidebarComponent {
     return level;
   }
 
-  // Flattened tree for easier template rendering
-  get flattenedNavigator() {
-    const page = this.editor.activePage();
-    const result: any[] = [];
-
-    const traverse = (ids: string[]) => {
-      ids.forEach(id => {
-        const el = page.elements[id];
-        if (!el) return;
-        result.push(el);
-        if (this.expandedElements.has(id) && el.children) {
-          traverse(el.children);
-        }
-      });
-    };
-
-    traverse(page.rootElements);
-    return result;
-  }
 
   addPage() {
     const name = prompt('Page Name:', 'New Page');

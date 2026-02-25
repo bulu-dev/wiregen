@@ -259,50 +259,6 @@
     }
 }
 
-.canvas-inserter {
-    margin: 40px auto;
-    width: 100%;
-    max-width: 1200px;
-    border: 2px dashed #e2e8f0;
-    border-radius: 12px;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.5);
-    position: relative;
-
-    &:hover {
-        border-color: var(--primary);
-        background: rgba(59, 130, 246, 0.05);
-
-        .inserter-plus {
-            transform: scale(1.1);
-            background: var(--primary);
-        }
-    }
-
-    .inserter-plus {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        background: #94a3b8;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-
-        .material-icons {
-            font-size: 30px;
-        }
-    }
-}
-
 .structure-picker {
     width: 100%;
     background: white;

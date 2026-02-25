@@ -23,39 +23,6 @@
         </div>
     </div>
 
-    <!-- Navigator -->
-    <div class="sidebar-section">
-        <div class="section-header">
-            <h2>Navigator</h2>
-        </div>
-        <div class="navigator-tree">
-            @for (el of flattenedNavigator; track el.id) {
-            <div class="nav-item" [class.selected]="editor.selectedElementId() === el.id"
-                [style.padding-left.px]="getElementLevel(el.id, editor.activePage().elements) * 16 + 8"
-                (click)="editor.selectElement(el.id)">
-
-                @if (el.children && el.children.length > 0) {
-                <button class="btn-expand" (click)="$event.stopPropagation(); toggleExpand(el.id)">
-                    <span class="material-icons">{{ expandedElements.has(el.id) ? 'expand_more' : 'chevron_right'
-                        }}</span>
-                </button>
-                } @else {
-                <span class="nav-spacer"></span>
-                }
-
-                <span class="material-icons nav-icon"
-                    [style.color]="el.type === 'section' ? '#3b82f6' : (el.type === 'column' ? '#64748b' : '#94a3b8')">
-                    {{ el.type === 'section' ? 'segment' : (el.type === 'column' ? 'view_column' : 'rectangle') }}
-                </span>
-                <span class="label">{{ el.name }}</span>
-            </div>
-            }
-            @if (flattenedNavigator.length === 0) {
-            <div class="empty-nav">No elements on page</div>
-            }
-        </div>
-    </div>
-
     <!-- Layout Elements -->
     <div class="sidebar-section">
         <div class="section-header">
