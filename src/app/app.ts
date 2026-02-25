@@ -3,11 +3,12 @@ import { NavbarComponent } from './features/editor/components/navbar/navbar.comp
 import { SidebarComponent } from './features/editor/components/sidebar/sidebar.component';
 import { CanvasComponent } from './features/editor/components/canvas/canvas.component';
 import { PropertiesComponent } from './features/editor/components/properties/properties.component';
+import { DialogComponent } from './shared/components/dialog/dialog.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NavbarComponent, SidebarComponent, CanvasComponent, PropertiesComponent],
+  imports: [NavbarComponent, SidebarComponent, CanvasComponent, PropertiesComponent, DialogComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

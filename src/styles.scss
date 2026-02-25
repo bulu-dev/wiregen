@@ -60,6 +60,23 @@ button {
   transition: all 0.2s ease;
 }
 
+.btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #f87171;
+  padding: 10px;
+  border-radius: var(--radius);
+  font-weight: 500;
+  font-size: 0.875rem;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.2);
+  }
+
+  &.btn-full {
+    width: 100%;
+  }
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

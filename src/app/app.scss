@@ -12,11 +12,16 @@
     overflow: hidden;
     position: relative;
 
-    app-sidebar,
-    app-properties {
-        flex: 0 0 280px;
+    app-sidebar {
+        flex: 0 0 260px;
         z-index: 10;
-        background: white;
+        background: var(--bg-sidebar);
+    }
+
+    app-properties {
+        flex: 0 0 320px;
+        z-index: 10;
+        background: var(--bg-sidebar);
     }
 
     app-canvas {

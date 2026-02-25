@@ -1,0 +1,30 @@
+<div class="dialog-wrapper" *ngIf="dialog.state().isOpen" (keydown)="onKeyDown($event)">
+    <div class="dialog-backdrop" @backdrop (click)="onCancel()"></div>
+
+    <div class="dialog-container" @modal>
+        <div class="dialog-header">
+            <h3>{{ dialog.state().title }}</h3>
+            <button class="btn-close" (click)="onCancel()">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <div class="dialog-body">
+            <p>{{ dialog.state().message }}</p>
+
+            @if (dialog.state().type === 'prompt') {
+            <div class="field">
+                <input #promptInput type="text" [(ngModel)]="promptValue" [placeholder]="'Enter value...'"
+                    (keydown.enter)="onConfirm()">
+            </div>
+            }
+        </div>
+
+        <div class="dialog-actions">
+            <button class="btn-secondary" (click)="onCancel()">Cancel</button>
+            <button [class]="dialog.state().isDanger ? 'btn-danger' : 'btn-primary'" (click)="onConfirm()">
+                {{ dialog.state().type === 'prompt' ? 'Confirm' : 'Yes, Proceed' }}
+            </button>
+        </div>
+    </div>
+</div>

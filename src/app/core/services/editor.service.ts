@@ -1,4 +1,5 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, effect, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { WireframeElement, ElementType, WireframeProject, WireframePage } from '../models/element.model';
 
 @Injectable({
@@ -8,6 +9,9 @@ import { WireframeElement, ElementType, WireframeProject, WireframePage } from '
     providedIn: 'root'
 })
 export class EditorService {
+    private platformId = inject(PLATFORM_ID);
+    private isBrowser = isPlatformBrowser(this.platformId);
+
     // Advanced project state with multi-page support
     project = signal<WireframeProject>({
         id: '1',
@@ -38,9 +42,51 @@ export class EditorService {
     }
 
     constructor() {
+        if (this.isBrowser) {
+            // Load persistable state
+            const savedProject = localStorage.getItem('wiregen_project');
+            if (savedProject) {
+                try {
+                    this.project.set(JSON.parse(savedProject));
+                } catch (e) {
+                    console.error('Failed to load project from localStorage', e);
+                }
+            }
+
+            const savedTheme = localStorage.getItem('wiregen_theme');
+            if (savedTheme === 'dark' || savedTheme === 'light') {
+                this.theme.set(savedTheme);
+                document.body.classList.toggle('dark', savedTheme === 'dark');
+            }
+
+            const savedGrid = localStorage.getItem('wiregen_grid');
+            if (savedGrid) {
+                try {
+                    this.gridSettings.set(JSON.parse(savedGrid));
+                } catch (e) {
+                    console.error('Failed to load grid settings from localStorage', e);
+                }
+            }
+
+            // Project persistent effect
+            effect(() => {
+                localStorage.setItem('wiregen_project', JSON.stringify(this.project()));
+            });
+
+            // Theme persistent effect
+            effect(() => {
+                localStorage.setItem('wiregen_theme', this.theme());
+            });
+
+            // Grid persistent effect
+            effect(() => {
+                localStorage.setItem('wiregen_grid', JSON.stringify(this.gridSettings()));
+            });
+        }
+
         // Initialize activePageId to the first page if not set
         const p = this.project();
-        if (p.pages.length > 0) {
+        if (p.pages.length > 0 && !p.activePageId) {
             this.project.update(prev => ({ ...prev, activePageId: prev.pages[0].id }));
         }
     }

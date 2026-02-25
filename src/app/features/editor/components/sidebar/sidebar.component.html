@@ -14,7 +14,7 @@
                 <span class="material-icons">description</span>
                 <span class="label">{{ page.name }}</span>
                 @if (editor.project().pages.length > 1) {
-                <button class="btn-delete" (click)="$event.stopPropagation(); editor.deletePage(page.id)">
+                <button class="btn-delete" (click)="$event.stopPropagation(); onDeletePage(page.id)">
                     <span class="material-icons">close</span>
                 </button>
                 }
@@ -60,6 +60,18 @@
                 </div>
             </div>
             }
+        </div>
+    </div>
+    <!-- Project Management -->
+    <div class="sidebar-section">
+        <div class="section-header">
+            <h2>Project</h2>
+        </div>
+        <div style="padding: 0 16px;">
+            <button class="btn-danger btn-full" (click)="onClearAll()"
+                style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span class="material-icons">delete_forever</span> Clear All
+            </button>
         </div>
     </div>
 </aside>
