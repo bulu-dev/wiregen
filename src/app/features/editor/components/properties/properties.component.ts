@@ -11,6 +11,9 @@ import { EditorService } from '../../../../core/services/editor.service';
     <aside class="properties">
       <div class="properties-header">
         <h2>Properties</h2>
+        @if (editor.selectedElement(); as el) {
+          <span class="selection-pill">{{ el.name }}</span>
+        }
       </div>
       
       @if (editor.selectedElement(); as el) {
@@ -158,7 +161,21 @@ import { EditorService } from '../../../../core/services/editor.service';
     .properties-header {
       padding: 20px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       h2 { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
+      .selection-pill {
+        font-size: 0.7rem;
+        padding: 2px 8px;
+        background: var(--primary);
+        color: white;
+        border-radius: 10px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
     }
     .properties-content {
       padding: 20px;

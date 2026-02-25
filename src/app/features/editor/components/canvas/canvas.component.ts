@@ -21,16 +21,15 @@ import { trigger, transition, style, animate } from '@angular/animations';
     <main class="canvas-container" 
           (click)="onCanvasClick($event)"
           (wheel)="onWheel($event)"
-          (mousedown)="onMouseDown($event)"
-          cdkDropList
-          (cdkDropListDropped)="onDrop($event)">
+          (mousedown)="onMouseDown($event)">
       
       <div class="canvas-viewport"
            [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
         <div class="canvas" 
              id="canvas-list"
              cdkDropList
-             [cdkDropListConnectedTo]="[]">
+             [cdkDropListConnectedTo]="[]"
+             (cdkDropListDropped)="onDrop($event)">
           @for (el of editor.allElements(); track el.id) {
             <div class="element"
                  [@fadeIn]
@@ -227,14 +226,17 @@ export class CanvasComponent {
   }
 
   onDrop(event: any) {
+    console.log('Drop event:', event);
     const type = event.item.data as ElementType;
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
     if (canvasEl) {
       const rect = canvasEl.getBoundingClientRect();
-      // Adjust for zoom and translation
       const x = (event.dropPoint.x - rect.left) / this.zoom;
       const y = (event.dropPoint.y - rect.top) / this.zoom;
+      console.log('Adding element:', type, 'at', x, y);
       this.editor.addElement(type, x, y);
+    } else {
+      console.warn('Canvas element not found for drop!');
     }
   }
 
