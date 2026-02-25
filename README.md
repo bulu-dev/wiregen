@@ -1,34 +1,47 @@
-# WireGen - Professional Wireframe Editor
+# WireGen
 
-**WireGen** is a high-performance wireframe editor built with Angular 21, designed for rapid web layout prototyping with semantic export capabilities.
+WireGen is a simple wireframe editor designed for quickly sketching out web layout ideas. You can place elements on a canvas, customize them, and export the result as a ready-to-use HTML/CSS package.
 
-## ✨ Features
+## Development
 
-- **Interactive Canvas**: Drag and drop elements, resize them, and edit properties in real-time.
-- **Signals Based Engine**: High-performance reactive state management using Angular Signals.
-- **Smart Components**: A library of web-standard elements (Button, Input, Image, Text, etc.).
-- **Live Preview**: Instantly preview your wireframe in a new window with live styles.
-- **Semantic Export**: Export your design as a production-ready ZIP bundle containing:
-  - Clean HTML5 & CSS3
-  - SEO-optimized `robots.txt` and `sitemap.xml`
-  - Project documentation
+To work on the project locally, first install the dependencies:
 
-## 🚀 Getting Started
+```bash
+npm install
+```
 
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
-2. **Start Development Server**:
-   ```bash
-   npm run start
-   ```
-3. **Open at**: `http://localhost:4200`
+Then, start the development server:
 
-## 📦 How to Export
+```bash
+npm run start
+```
 
-Click the **Export** button in the top navigation bar. WireGen will generate all necessary files and package them into a single `.zip` file for your production use.
+The application will be available at `http://localhost:4200`.
 
----
+## Build and Deployment
 
-Built with ❤️ using Angular 21, Tailwind CSS, and JSZip.
+Since this application uses Angular SSR (Server-Side Rendering), there are a few things to keep in mind for building and deployment.
+
+### Creating a Build
+To create a production-ready build, use the standard build command:
+
+```bash
+npm run build
+```
+
+This command generates both the client files and the server bundle in the `dist` folder.
+
+### Running in Production
+After the build is complete, you can start the SSR server:
+
+```bash
+npm run serve:ssr:WireGen
+```
+
+Alternatively, you can run the generated server script directly with Node:
+
+```bash
+node dist/WireGen/server/server.mjs
+```
+
+This is the standard way to run the application on a server (e.g., behind a reverse proxy like Nginx).
