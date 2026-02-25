@@ -17,6 +17,7 @@ export interface ElementStyles {
   justifyContent?: string;
   alignItems?: string;
   gap?: number;
+  fontWeight?: string | number;
 }
 
 export interface WireframeElement {
@@ -26,6 +27,7 @@ export interface WireframeElement {
   styles: ElementStyles;
   content?: string;
   placeholder?: string;
+  imageUrl?: string;
   parentId?: string;
   children?: string[]; // IDs of child elements
 }

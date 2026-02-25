@@ -93,24 +93,42 @@ export class EditorService {
 
     deleteElement(id: string) {
         this.project.update(p => {
-            const { [id]: deleted, ...remaining } = p.elements;
+            const elements = { ...p.elements };
+            const idsToDelete = this.getIdsToDelete(id, elements);
+
+            const deleted = elements[id];
+
+            // Remove from elements map
+            idsToDelete.forEach(idToDelete => delete elements[idToDelete]);
+
+            // Remove from rootElements
             let rootElements = p.rootElements.filter(rid => rid !== id);
 
             // Cleanup parent reference
-            if (deleted?.parentId && remaining[deleted.parentId]) {
-                remaining[deleted.parentId] = {
-                    ...remaining[deleted.parentId],
-                    children: (remaining[deleted.parentId].children || []).filter(cid => cid !== id)
+            if (deleted?.parentId && elements[deleted.parentId]) {
+                elements[deleted.parentId] = {
+                    ...elements[deleted.parentId],
+                    children: (elements[deleted.parentId].children || []).filter(cid => cid !== id)
                 };
             }
 
-            // TODO: Recursively delete children if needed, for now just orphan them or keep it simple
-            return { ...p, elements: remaining, rootElements };
+            return { ...p, elements, rootElements };
         });
 
         if (this.selectedElementId() === id) {
             this.selectedElementId.set(null);
         }
+    }
+
+    private getIdsToDelete(id: string, elements: Record<string, WireframeElement>): string[] {
+        let ids = [id];
+        const el = elements[id];
+        if (el?.children) {
+            el.children.forEach(childId => {
+                ids = [...ids, ...this.getIdsToDelete(childId, elements)];
+            });
+        }
+        return ids;
     }
 
     clearProject() {

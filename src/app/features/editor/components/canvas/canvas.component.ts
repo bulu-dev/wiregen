@@ -36,6 +36,10 @@ import { trigger, transition, style, animate } from '@angular/animations';
                [style.background-color]="el.styles.backgroundColor"
                [style.borderRadius.px]="el.styles.borderRadius"
                [style.color]="el.styles.color"
+               [style.fontSize.px]="el.styles.fontSize"
+               [style.border-width.px]="el.styles.borderWidth"
+               [style.border-color]="el.styles.borderColor"
+               [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
                (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
                cdkDrag
                [cdkDragBoundary]="'.canvas'"
@@ -47,7 +51,11 @@ import { trigger, transition, style, animate } from '@angular/animations';
               } @else if (el.type === 'input') {
                 <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
               } @else if (el.type === 'image') {
-                <div class="image-placeholder">🖼️</div>
+                @if (el.imageUrl) {
+                  <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
+                } @else {
+                  <div class="image-placeholder">🖼️</div>
+                }
               }
             </div>
 
@@ -90,11 +98,12 @@ import { trigger, transition, style, animate } from '@angular/animations';
     .element {
       position: absolute;
       border: 1px solid transparent;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, width 0.1s, height 0.1s, top 0.1s, left 0.1s, font-size 0.2s;
       display: flex;
       align-items: center;
       justify-content: center;
       user-select: none;
+      box-sizing: border-box;
       
       &.selected {
         border: 2px solid var(--primary);

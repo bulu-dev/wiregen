@@ -4,10 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { EditorService } from '../../../../core/services/editor.service';
 
 @Component({
-    selector: 'app-properties',
-    standalone: true,
-    imports: [CommonModule, FormsModule],
-    template: `
+  selector: 'app-properties',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
     <aside class="properties">
       <div class="properties-header">
         <h2>Properties</h2>
@@ -47,10 +47,43 @@ import { EditorService } from '../../../../core/services/editor.service';
 
           <div class="section">
             <h3>Appearance</h3>
-            <div class="field" *ngIf="el.type !== 'text'">
-              <label>Background</label>
-              <input type="color" [ngModel]="el.styles.backgroundColor" (ngModelChange)="editor.updateStyles(el.id, { backgroundColor: $event })">
+            <div class="grid">
+              <div class="field" *ngIf="el.type !== 'text'">
+                <label>Background</label>
+                <input type="color" [ngModel]="el.styles.backgroundColor" (ngModelChange)="editor.updateStyles(el.id, { backgroundColor: $event })">
+              </div>
+              <div class="field">
+                <label>Text Color</label>
+                <input type="color" [ngModel]="el.styles.color" (ngModelChange)="editor.updateStyles(el.id, { color: $event })">
+              </div>
+              <div class="field">
+                <label>Font Size</label>
+                <input type="number" [ngModel]="el.styles.fontSize || 14" (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
+              </div>
+              <div class="field">
+                <label>Radius</label>
+                <input type="number" [ngModel]="el.styles.borderRadius || 0" (ngModelChange)="editor.updateStyles(el.id, { borderRadius: $event })">
+              </div>
+              <div class="field">
+                <label>Border Width</label>
+                <input type="number" [ngModel]="el.styles.borderWidth || 0" (ngModelChange)="editor.updateStyles(el.id, { borderWidth: $event })">
+              </div>
+              <div class="field">
+                <label>Border Color</label>
+                <input type="color" [ngModel]="el.styles.borderColor || '#cccccc'" (ngModelChange)="editor.updateStyles(el.id, { borderColor: $event })">
+              </div>
             </div>
+            
+            <div class="field" *ngIf="el.type === 'image'">
+              <label>Image URL</label>
+              <input type="text" [ngModel]="el.imageUrl" placeholder="https://..." (ngModelChange)="editor.updateElement(el.id, { imageUrl: $event })">
+            </div>
+
+            <div class="field" *ngIf="el.type === 'input'">
+              <label>Placeholder text</label>
+              <input type="text" [ngModel]="el.placeholder" placeholder="Enter text..." (ngModelChange)="editor.updateElement(el.id, { placeholder: $event })">
+            </div>
+
             <div class="field" *ngIf="el.content !== undefined">
               <label>Content</label>
               <textarea [ngModel]="el.content" (ngModelChange)="editor.updateElement(el.id, { content: $event })"></textarea>
@@ -68,7 +101,7 @@ import { EditorService } from '../../../../core/services/editor.service';
       }
     </aside>
   `,
-    styles: [`
+  styles: [`
     .properties {
       width: 300px;
       background: white;
@@ -125,5 +158,5 @@ import { EditorService } from '../../../../core/services/editor.service';
   `]
 })
 export class PropertiesComponent {
-    editor = inject(EditorService);
+  editor = inject(EditorService);
 }

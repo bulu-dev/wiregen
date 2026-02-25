@@ -1,59 +1,34 @@
-# WireGen
+# WireGen - Professional Wireframe Editor
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.2.
+**WireGen** is a high-performance wireframe editor built with Angular 21, designed for rapid web layout prototyping with semantic export capabilities.
 
-## Development server
+## ✨ Features
 
-To start a local development server, run:
+- **Interactive Canvas**: Drag and drop elements, resize them, and edit properties in real-time.
+- **Signals Based Engine**: High-performance reactive state management using Angular Signals.
+- **Smart Components**: A library of web-standard elements (Button, Input, Image, Text, etc.).
+- **Live Preview**: Instantly preview your wireframe in a new window with live styles.
+- **Semantic Export**: Export your design as a production-ready ZIP bundle containing:
+  - Clean HTML5 & CSS3
+  - SEO-optimized `robots.txt` and `sitemap.xml`
+  - Project documentation
 
-```bash
-ng serve
-```
+## 🚀 Getting Started
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
+2. **Start Development Server**:
+   ```bash
+   npm run start
+   ```
+3. **Open at**: `http://localhost:4200`
 
-## Code scaffolding
+## 📦 How to Export
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Click the **Export** button in the top navigation bar. WireGen will generate all necessary files and package them into a single `.zip` file for your production use.
 
-```bash
-ng generate component component-name
-```
+---
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Built with ❤️ using Angular 21, Tailwind CSS, and JSZip.

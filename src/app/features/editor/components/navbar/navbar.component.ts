@@ -16,7 +16,7 @@ import { ExportService } from '../../../../core/services/export.service';
       </div>
       <div class="actions">
         <button class="btn btn-outline" (click)="editor.clearProject()">Clear</button>
-        <button class="btn btn-outline">Preview</button>
+        <button class="btn btn-outline" (click)="exportService.previewProject()">Preview</button>
         <button class="btn btn-primary" (click)="onExport()">Export</button>
       </div>
     </nav>
