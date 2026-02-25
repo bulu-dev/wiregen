@@ -36,6 +36,11 @@ export class CanvasComponent {
   private lastMouseX = 0;
   private lastMouseY = 0;
 
+  // Selection Box state
+  isSelecting = signal(false);
+  selectionBox = signal<{ x: number, y: number, w: number, h: number } | null>(null);
+  private selectionStart = { x: 0, y: 0 };
+
   activeDropTarget = signal<string | null>(null);
   alignmentGuides = signal<{ id: string, type: 'v' | 'h' | 'spacing-v' | 'spacing-h', pos: number, size?: number, label?: string }[]>([]);
 
@@ -54,6 +59,24 @@ export class CanvasComponent {
       this.lastMouseX = event.clientX;
       this.lastMouseY = event.clientY;
       event.preventDefault();
+      return;
+    }
+
+    // Marquee Selection Start
+    if (event.button === 0) {
+      const target = event.target as HTMLElement;
+      if (target.classList.contains('canvas') || target.classList.contains('grid-overlay') || target.classList.contains('canvas-viewport')) {
+        this.isSelecting.set(true);
+        const canvasEl = document.querySelector('.canvas') as HTMLElement;
+        const rect = canvasEl.getBoundingClientRect();
+
+        this.selectionStart = {
+          x: (event.clientX - rect.left) / this.zoom,
+          y: (event.clientY - rect.top) / this.zoom
+        };
+        this.selectionBox.set({ ...this.selectionStart, w: 0, h: 0 });
+        this.editor.selectElement(null);
+      }
     }
   }
 
@@ -182,14 +205,22 @@ export class CanvasComponent {
 
     // Shortcuts
     if (event.ctrlKey || event.metaKey) {
-      if (event.key === 'c') this.editor.copyElement(this.editor.selectedElementId() || '');
+      if (event.key === 'c') this.editor.copyElement(this.editor.selectedElementIds()[0] || '');
       if (event.key === 'v') this.editor.pasteElement();
       if (event.key === 'x') {
-        const id = this.editor.selectedElementId();
+        const id = this.editor.selectedElementIds()[0];
         if (id) {
           this.editor.copyElement(id);
           this.editor.deleteElement(id);
         }
+      }
+    }
+
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+      // Only delete if not in an input/textarea
+      const target = event.target as HTMLElement;
+      if (target.tagName !== 'INPUT' && target.tagName !== 'TEXTAREA') {
+        this.editor.deleteSelectedElements();
       }
     }
   }
@@ -372,13 +403,67 @@ export class CanvasComponent {
       this.translateY += event.clientY - this.lastMouseY;
       this.lastMouseX = event.clientX;
       this.lastMouseY = event.clientY;
+    } else if (this.isSelecting()) {
+      const canvasEl = document.querySelector('.canvas') as HTMLElement;
+      const rect = canvasEl.getBoundingClientRect();
+      const currentX = (event.clientX - rect.left) / this.zoom;
+      const currentY = (event.clientY - rect.top) / this.zoom;
+
+      const x = Math.min(this.selectionStart.x, currentX);
+      const y = Math.min(this.selectionStart.y, currentY);
+      const w = Math.abs(currentX - this.selectionStart.x);
+      const h = Math.abs(currentY - this.selectionStart.y);
+
+      this.selectionBox.set({ x, y, w, h });
     }
   }
 
   @HostListener('window:mouseup')
   onMouseUp() {
+    if (this.isSelecting()) {
+      this.finalizeSelection();
+    }
     this.isResizing = false;
     this.isPanning = false;
+    this.isSelecting.set(false);
+    this.selectionBox.set(null);
     this.resizeId = '';
+  }
+
+  private finalizeSelection() {
+    const box = this.selectionBox();
+    if (!box || (box.w < 5 && box.h < 5)) return;
+
+    const selectedIds: string[] = [];
+    const elements = this.editor.activePage().elements;
+
+    Object.values(elements).forEach(el => {
+      const pos = this.editor.getElementAbsolutePosition(el.id);
+      const elRect = {
+        left: pos.left,
+        top: pos.top,
+        right: pos.left + el.styles.width,
+        bottom: pos.top + el.styles.height
+      };
+
+      const boxRect = {
+        left: box.x,
+        top: box.y,
+        right: box.x + box.w,
+        bottom: box.y + box.h
+      };
+
+      // Collision detection (rect overlap)
+      if (!(elRect.left > boxRect.right ||
+        elRect.right < boxRect.left ||
+        elRect.top > boxRect.bottom ||
+        elRect.bottom < boxRect.top)) {
+        selectedIds.push(el.id);
+      }
+    });
+
+    if (selectedIds.length > 0) {
+      this.editor.selectElement(selectedIds);
+    }
   }
 }

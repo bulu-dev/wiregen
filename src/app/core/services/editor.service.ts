@@ -91,7 +91,7 @@ export class EditorService {
         }
     }
 
-    selectedElementId = signal<string | null>(null);
+    selectedElementIds = signal<string[]>([]);
 
     // Computed views
     activePage = computed(() => {
@@ -104,10 +104,10 @@ export class EditorService {
     });
 
     selectedElement = computed<WireframeElement | null>(() => {
-        const id = this.selectedElementId();
+        const ids = this.selectedElementIds();
         const page = this.activePage();
-        if (!id || !page) return null;
-        return page.elements[id] || null;
+        if (ids.length === 0 || !page) return null;
+        return page.elements[ids[0]] || null;
     });
 
     getElementAbsolutePosition(id: string, elements?: Record<string, WireframeElement>): { left: number, top: number } {
@@ -203,12 +203,12 @@ export class EditorService {
             pages: [...p.pages, newPage],
             activePageId: newPage.id
         }));
-        this.selectedElementId.set(null);
+        this.selectedElementIds.set([]);
     }
 
     setActivePage(id: string) {
         this.project.update(p => ({ ...p, activePageId: id }));
-        this.selectedElementId.set(null);
+        this.selectedElementIds.set([]);
     }
 
     renamePage(id: string, name: string) {
@@ -291,7 +291,7 @@ export class EditorService {
             return { ...p, pages };
         });
 
-        this.selectedElementId.set(id);
+        this.selectedElementIds.set([id]);
         return id;
     }
 
@@ -368,9 +368,15 @@ export class EditorService {
             return { ...p, pages };
         });
 
-        if (this.selectedElementId() === id) {
-            this.selectedElementId.set(null);
+        if (this.selectedElementIds().includes(id)) {
+            this.selectedElementIds.update(ids => ids.filter(i => i !== id));
         }
+    }
+
+    deleteSelectedElements() {
+        const ids = this.selectedElementIds();
+        ids.forEach(id => this.deleteElement(id));
+        this.selectedElementIds.set([]);
     }
 
     private getIdsToDelete(id: string, elements: Record<string, WireframeElement>): string[] {
@@ -402,11 +408,28 @@ export class EditorService {
         // Re-init activePageId
         const newId = this.project().pages[0].id;
         this.project.update(p => ({ ...p, activePageId: newId }));
-        this.selectedElementId.set(null);
+        this.selectedElementIds.set([]);
     }
 
-    selectElement(id: string | null) {
-        this.selectedElementId.set(id);
+    selectElement(idOrIds: string | string[] | null, append: boolean = false) {
+        if (idOrIds === null) {
+            this.selectedElementIds.set([]);
+            return;
+        }
+
+        const newIds = Array.isArray(idOrIds) ? idOrIds : [idOrIds];
+
+        if (append) {
+            this.selectedElementIds.update(current => {
+                const updated = [...current];
+                newIds.forEach(id => {
+                    if (!updated.includes(id)) updated.push(id);
+                });
+                return updated;
+            });
+        } else {
+            this.selectedElementIds.set(newIds);
+        }
     }
 
     copyElement(id: string) {
@@ -454,12 +477,17 @@ export class EditorService {
             return { ...p, pages };
         });
 
-        this.selectedElementId.set(id);
+        this.selectedElementIds.set([id]);
     }
 
     duplicateElement(id: string) {
         this.copyElement(id);
         this.pasteElement(this.activePage().elements[id]?.parentId);
+    }
+
+    duplicateSelectedElements() {
+        const ids = this.selectedElementIds();
+        ids.forEach(id => this.duplicateElement(id));
     }
 
     updateContainerSize(containerId: string) {

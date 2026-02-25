@@ -31,6 +31,12 @@
             @for (elId of editor.activePage().rootElements; track elId) {
             <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
             }
+
+            <!-- Selection Box -->
+            @if (selectionBox(); as box) {
+            <div class="selection-box" [style.left.px]="box.x" [style.top.px]="box.y" [style.width.px]="box.w"
+                [style.height.px]="box.h"></div>
+            }
         </div>
     </div>
 
@@ -41,7 +47,7 @@
         <button (click)="onDuplicate()" role="menuitem" aria-label="Duplicate selected element">
             <span class="material-icons" aria-hidden="true">content_copy</span> Duplicate
         </button>
-        <button (click)="onDelete()" class="danger" role="menuitem" aria-label="Delete selected element">
+        <button (click)="onDelete()" class="danger" role="menuitem" aria-label="Delete selected elements">
             <span class="material-icons" aria-hidden="true">delete</span> Delete
         </button>
     </div>
@@ -49,7 +55,8 @@
 
     <ng-template #elementTmpl let-id="id">
         @if (editor.activePage().elements[id]; as el) {
-        <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementId() === el.id" [ngStyle]="{
+        <div class="element" [@fadeIn] [id]="el.id" [class.selected]="editor.selectedElementIds().includes(el.id)"
+            [ngStyle]="{
                 'width.px': el.styles.width,
                 'height.px': el.styles.height,
                 'top.px': el.styles.top,
@@ -76,9 +83,9 @@
             }"
             [class.same-color]="el.parentId && editor.activePage().elements[el.parentId]?.styles?.backgroundColor === el.styles.backgroundColor"
             [class.ant-march]="activeDropTarget() === el.id"
-            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
-            (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
-            cdkDrag (cdkDragEnded)="onDragEnded($event, el.id)"
+            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id, $event.shiftKey)"
+            (click)="editor.selectElement(el.id, $event.shiftKey); $event.stopPropagation()"
+            (contextmenu)="onContextMenu($event, el.id)" cdkDrag (cdkDragEnded)="onDragEnded($event, el.id)"
             (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y, el.id) || null)">
 
             <!-- Element Handles (Elementor-style) -->
@@ -109,7 +116,7 @@
                 }
             </div>
 
-            @if (editor.selectedElementId() === el.id) {
+            @if (editor.selectedElementIds().includes(el.id) && editor.selectedElementIds().length === 1) {
             <div class="resize-handle n" (mousedown)="startResize($event, el.id, 'n')"></div>
             <div class="resize-handle s" (mousedown)="startResize($event, el.id, 's')"></div>
             <div class="resize-handle e" (mousedown)="startResize($event, el.id, 'e')"></div>
