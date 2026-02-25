@@ -426,7 +426,7 @@ export class EditorService {
             });
 
             const newHeight = maxY + (container.styles.padding || 16);
-            if (newHeight === container.styles.height) return p;
+            if (newHeight <= container.styles.height) return p;
 
             const pages = [...p.pages];
             const updatedPage = { ...page };
