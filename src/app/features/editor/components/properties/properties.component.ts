@@ -20,6 +20,10 @@ import { EditorService } from '../../../../core/services/editor.service';
             <div class="field">
               <label>Name</label>
               <input type="text" [ngModel]="el.name" (ngModelChange)="editor.updateElement(el.id, { name: $event })">
+              <div class="identity-info">
+                <span class="identity-badge">{{ el.type }}</span>
+                <span class="id-text">ID: {{ el.id.slice(0, 8) }}...</span>
+              </div>
             </div>
           </div>
 
@@ -42,6 +46,51 @@ import { EditorService } from '../../../../core/services/editor.service';
                 <label>Height</label>
                 <input type="number" [ngModel]="el.styles.height" (ngModelChange)="editor.updateStyles(el.id, { height: $event })">
               </div>
+              <div class="field" *ngIf="el.type === 'container' || el.type === 'rect'">
+                <label>Gap</label>
+                <input type="number" [ngModel]="el.styles.gap || 0" (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
+              </div>
+              <div class="field" *ngIf="el.type === 'container' || el.type === 'rect'">
+                <label>Padding</label>
+                <input type="number" [ngModel]="el.styles.padding || 0" (ngModelChange)="editor.updateStyles(el.id, { padding: $event })">
+              </div>
+            </div>
+            
+            <div class="field-group" *ngIf="el.type === 'container' || el.type === 'rect'">
+              <label>Flex Distribution</label>
+              <div class="flex-controls">
+                <select [ngModel]="el.styles.justifyContent || 'center'" (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
+                  <option value="flex-start">Start</option>
+                  <option value="center">Center</option>
+                  <option value="flex-end">End</option>
+                  <option value="space-between">Between</option>
+                </select>
+                <select [ngModel]="el.styles.alignItems || 'center'" (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
+                  <option value="flex-start">Top</option>
+                  <option value="center">Middle</option>
+                  <option value="flex-end">Bottom</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>Typography</h3>
+            <div class="grid">
+              <div class="field">
+                <label>Font Size</label>
+                <input type="number" [ngModel]="el.styles.fontSize || 14" (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
+              </div>
+              <div class="field">
+                <label>Weight</label>
+                <select [ngModel]="el.styles.fontWeight || 400" (ngModelChange)="editor.updateStyles(el.id, { fontWeight: $event })">
+                  <option value="300">Light</option>
+                  <option value="400">Regular</option>
+                  <option value="500">Medium</option>
+                  <option value="600">Semi Bold</option>
+                  <option value="700">Bold</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -55,10 +104,6 @@ import { EditorService } from '../../../../core/services/editor.service';
               <div class="field">
                 <label>Text Color</label>
                 <input type="color" [ngModel]="el.styles.color" (ngModelChange)="editor.updateStyles(el.id, { color: $event })">
-              </div>
-              <div class="field">
-                <label>Font Size</label>
-                <input type="number" [ngModel]="el.styles.fontSize || 14" (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
               </div>
               <div class="field">
                 <label>Radius</label>
@@ -129,19 +174,41 @@ import { EditorService } from '../../../../core/services/editor.service';
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
+    .field-group {
+      margin-top: 12px;
+      label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text-main); margin-bottom: 8px; }
+      .flex-controls {
+        display: flex;
+        gap: 8px;
+        select { flex: 1; }
+      }
+    }
     .field {
       margin-bottom: 12px;
       label { display: block; font-size: 0.75rem; font-weight: 500; color: var(--text-main); margin-bottom: 4px; }
-      input, textarea {
+      input, textarea, select {
         width: 100%;
         padding: 8px;
         border: 1px solid var(--border);
         border-radius: 4px;
         font-size: 0.875rem;
+        background: white;
         &:focus { outline: none; border-color: var(--primary); }
       }
       textarea { height: 80px; resize: vertical; }
     }
+    .identity-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #64748b;
+      margin-top: 4px;
+      text-transform: capitalize;
+    }
+    .id-text { font-family: monospace; font-size: 0.65rem; color: var(--text-muted); margin-top: 4px; display: block; }
     .actions { margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px; }
     .btn-danger { width: 100%; background: #fee2e2; color: #dc2626; padding: 10px; border-radius: var(--radius); font-weight: 500; }
     .btn-danger:hover { background: #fecaca; }

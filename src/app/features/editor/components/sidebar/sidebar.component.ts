@@ -17,7 +17,10 @@ interface SidebarItem {
       <div class="sidebar-header">
         <h2>Elements</h2>
       </div>
-      <div class="element-list">
+      <div class="element-list"
+           cdkDropList
+           [cdkDropListConnectedTo]="['canvas-list']"
+           cdkDropListOrientation="vertical">
         @for (item of items; track item.type) {
           <div class="element-item" 
                cdkDrag
@@ -27,7 +30,8 @@ interface SidebarItem {
             
             <!-- Drag Preview -->
             <div *cdkDragPreview class="drag-preview">
-              {{ item.label }}
+              <span class="icon">{{ item.icon }}</span>
+              <span class="label">{{ item.label }}</span>
             </div>
           </div>
         }

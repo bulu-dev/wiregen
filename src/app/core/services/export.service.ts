@@ -131,6 +131,7 @@ button { cursor: pointer; border: none; font-weight: 500; }
 
         Object.values(project.elements).forEach(el => {
             const bWidth = el.styles.borderWidth || 0;
+            const isFlex = el.type === 'container' || el.type === 'rect';
             css += `
 .element-${el.id} {
   width: ${el.styles.width}px;
@@ -143,6 +144,14 @@ button { cursor: pointer; border: none; font-weight: 500; }
   border: ${bWidth}px solid ${el.styles.borderColor || '#cbd5e1'};
   padding: ${el.styles.padding || 8}px;
   font-size: ${el.styles.fontSize || 14}px;
+  font-weight: ${el.styles.fontWeight || 400};
+  ${isFlex ? `
+  display: flex;
+  flex-direction: column;
+  justify-content: ${el.styles.justifyContent || 'center'};
+  align-items: ${el.styles.alignItems || 'center'};
+  gap: ${el.styles.gap || 0}px;
+  ` : ''}
 }
 `;
         });

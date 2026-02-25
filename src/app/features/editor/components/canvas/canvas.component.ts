@@ -20,54 +20,68 @@ import { trigger, transition, style, animate } from '@angular/animations';
   template: `
     <main class="canvas-container" 
           (click)="onCanvasClick($event)"
+          (wheel)="onWheel($event)"
+          (mousedown)="onMouseDown($event)"
           cdkDropList
           (cdkDropListDropped)="onDrop($event)">
       
-      <div class="canvas" [style.transform]="'scale(' + zoom + ')'">
-        @for (el of editor.allElements(); track el.id) {
-          <div class="element"
-               [@fadeIn]
-               [id]="el.id"
-               [class.selected]="editor.selectedElementId() === el.id"
-               [style.width.px]="el.styles.width"
-               [style.height.px]="el.styles.height"
-               [style.top.px]="el.styles.top"
-               [style.left.px]="el.styles.left"
-               [style.background-color]="el.styles.backgroundColor"
-               [style.borderRadius.px]="el.styles.borderRadius"
-               [style.color]="el.styles.color"
-               [style.fontSize.px]="el.styles.fontSize"
-               [style.border-width.px]="el.styles.borderWidth"
-               [style.border-color]="el.styles.borderColor"
-               [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
-               (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
-               cdkDrag
-               [cdkDragBoundary]="'.canvas'"
-               (cdkDragEnded)="onDragEnded($event, el.id)">
-            
-            <div class="element-content" [class.no-pointer]="el.type !== 'container'">
-              @if (el.type === 'text' || el.type === 'button') {
-                {{ el.content }}
-              } @else if (el.type === 'input') {
-                <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
-              } @else if (el.type === 'image') {
-                @if (el.imageUrl) {
-                  <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
-                } @else {
-                  <div class="image-placeholder">🖼️</div>
+      <div class="canvas-viewport"
+           [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
+        <div class="canvas" 
+             id="canvas-list"
+             cdkDropList
+             [cdkDropListConnectedTo]="[]">
+          @for (el of editor.allElements(); track el.id) {
+            <div class="element"
+                 [@fadeIn]
+                 [id]="el.id"
+                 [class.selected]="editor.selectedElementId() === el.id"
+                 [style.width.px]="el.styles.width"
+                 [style.height.px]="el.styles.height"
+                 [style.top.px]="el.styles.top"
+                 [style.left.px]="el.styles.left"
+                 [style.background-color]="el.styles.backgroundColor"
+                 [style.borderRadius.px]="el.styles.borderRadius"
+                 [style.color]="el.styles.color"
+                 [style.fontSize.px]="el.styles.fontSize"
+                 [style.fontWeight]="el.styles.fontWeight"
+                 [style.border-width.px]="el.styles.borderWidth"
+                 [style.border-color]="el.styles.borderColor"
+                 [style.border-style]="el.styles.borderWidth ? 'solid' : 'transparent'"
+                 [style.justify-content]="el.styles.justifyContent"
+                 [style.align-items]="el.styles.alignItems"
+                 [style.gap.px]="el.styles.gap"
+                 [style.padding.px]="el.styles.padding"
+                 (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
+                 cdkDrag
+                 [cdkDragBoundary]="'.canvas'"
+                 (cdkDragEnded)="onDragEnded($event, el.id)">
+              
+              <div class="element-content" [class.no-pointer]="el.type !== 'container'">
+                @if (el.type === 'text' || el.type === 'button') {
+                  {{ el.content }}
+                } @else if (el.type === 'input') {
+                  <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
+                } @else if (el.type === 'image') {
+                  @if (el.imageUrl) {
+                    <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
+                  } @else {
+                    <div class="image-placeholder">🖼️</div>
+                  }
                 }
+              </div>
+
+              @if (editor.selectedElementId() === el.id) {
+                <div class="resize-handle bottom-right" (mousedown)="startResize($event, el.id)"></div>
               }
             </div>
-
-            @if (editor.selectedElementId() === el.id) {
-              <div class="resize-handle bottom-right" (mousedown)="startResize($event, el.id)"></div>
-            }
-          </div>
-        }
+          }
+        </div>
       </div>
 
       <div class="canvas-actions">
-        <span>Zoom: {{ zoom * 100 }}%</span>
+        <span>Zoom: {{ (zoom * 100).toFixed(0) }}% | Pan: {{ translateX.toFixed(0) }}, {{ translateY.toFixed(0) }}</span>
+        <button class="btn-mini" (click)="resetView()">Reset View</button>
       </div>
     </main>
   `,
@@ -75,8 +89,17 @@ import { trigger, transition, style, animate } from '@angular/animations';
     .canvas-container {
       flex: 1;
       background: var(--bg-main);
-      overflow: auto;
+      overflow: hidden;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: grab;
+      &:active { cursor: grabbing; }
+    }
+    .canvas-viewport {
+      transform-origin: center;
+      transition: transform 0.05s ease-out;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -100,13 +123,15 @@ import { trigger, transition, style, animate } from '@angular/animations';
       border: 1px solid transparent;
       transition: border-color 0.2s, width 0.1s, height 0.1s, top 0.1s, left 0.1s, font-size 0.2s;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       user-select: none;
       box-sizing: border-box;
+      overflow: hidden;
       
       &.selected {
-        border: 2px solid var(--primary);
+        border: 2px solid var(--primary) !important;
         z-index: 10;
       }
       
@@ -145,21 +170,70 @@ import { trigger, transition, style, animate } from '@angular/animations';
       box-shadow: var(--shadow);
       font-size: 12px;
       color: var(--text-muted);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-mini {
+      padding: 2px 8px;
+      font-size: 10px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: transparent;
+      cursor: pointer;
+      &:hover { background: #f3f4f6; }
     }
   `]
 })
 export class CanvasComponent {
   editor = inject(EditorService);
+
+  // Viewport state
   zoom = 1;
+  translateX = 0;
+  translateY = 0;
+
+  // Interaction state
+  private isResizing = false;
+  private isPanning = false;
+  private resizeId = '';
+  private lastMouseX = 0;
+  private lastMouseY = 0;
+
+  onWheel(event: WheelEvent) {
+    event.preventDefault();
+    const zoomSpeed = 0.1;
+    const delta = event.deltaY > 0 ? -zoomSpeed : zoomSpeed;
+    const newZoom = Math.min(Math.max(0.1, this.zoom + delta), 5);
+
+    // Optional: Zoom towards mouse position
+    // For now, simple zoom is enough for a start
+    this.zoom = newZoom;
+  }
+
+  onMouseDown(event: MouseEvent) {
+    if (event.button === 1 || (event.button === 0 && event.altKey)) { // Middle click or Alt+Left
+      this.isPanning = true;
+      this.lastMouseX = event.clientX;
+      this.lastMouseY = event.clientY;
+      event.preventDefault();
+    }
+  }
+
+  resetView() {
+    this.zoom = 1;
+    this.translateX = 0;
+    this.translateY = 0;
+  }
 
   onDrop(event: any) {
-    // This is from Sidebar dragging
     const type = event.item.data as ElementType;
-    const canvasRect = document.querySelector('.canvas')?.getBoundingClientRect();
-    if (canvasRect) {
-      // Calculate position relative to canvas
-      const x = event.dropPoint.x - canvasRect.left;
-      const y = event.dropPoint.y - canvasRect.top;
+    const canvasEl = document.querySelector('.canvas') as HTMLElement;
+    if (canvasEl) {
+      const rect = canvasEl.getBoundingClientRect();
+      // Adjust for zoom and translation
+      const x = (event.dropPoint.x - rect.left) / this.zoom;
+      const y = (event.dropPoint.y - rect.top) / this.zoom;
       this.editor.addElement(type, x, y);
     }
   }
@@ -168,12 +242,12 @@ export class CanvasComponent {
     const { x, y } = event.distance;
     const el = this.editor.project().elements[id];
     if (el) {
+      // Adjust movement for zoom
       this.editor.updateStyles(id, {
-        left: el.styles.left + x,
-        top: el.styles.top + y
+        left: el.styles.left + (x / this.zoom),
+        top: el.styles.top + (y / this.zoom)
       });
     }
-    // Reset transform because we updated top/left
     event.source.reset();
   }
 
@@ -183,15 +257,13 @@ export class CanvasComponent {
     }
   }
 
-  // Basic Resizing logic
-  private isResizing = false;
-  private resizeId = '';
-
   startResize(event: MouseEvent, id: string) {
     event.stopPropagation();
     event.preventDefault();
     this.isResizing = true;
     this.resizeId = id;
+    this.lastMouseX = event.clientX;
+    this.lastMouseY = event.clientY;
   }
 
   @HostListener('window:mousemove', ['$event'])
@@ -199,22 +271,29 @@ export class CanvasComponent {
     if (this.isResizing && this.resizeId) {
       const el = this.editor.project().elements[this.resizeId];
       if (el) {
-        const canvasRect = document.querySelector('.canvas')?.getBoundingClientRect();
-        if (canvasRect) {
-          const newWidth = event.clientX - canvasRect.left - el.styles.left;
-          const newHeight = event.clientY - canvasRect.top - el.styles.top;
-          this.editor.updateStyles(this.resizeId, {
-            width: Math.max(20, newWidth),
-            height: Math.max(20, newHeight)
-          });
-        }
+        const deltaX = (event.clientX - this.lastMouseX) / this.zoom;
+        const deltaY = (event.clientY - this.lastMouseY) / this.zoom;
+
+        this.editor.updateStyles(this.resizeId, {
+          width: Math.max(20, el.styles.width + deltaX),
+          height: Math.max(20, el.styles.height + deltaY)
+        });
+
+        this.lastMouseX = event.clientX;
+        this.lastMouseY = event.clientY;
       }
+    } else if (this.isPanning) {
+      this.translateX += event.clientX - this.lastMouseX;
+      this.translateY += event.clientY - this.lastMouseY;
+      this.lastMouseX = event.clientX;
+      this.lastMouseY = event.clientY;
     }
   }
 
   @HostListener('window:mouseup')
   onMouseUp() {
     this.isResizing = false;
+    this.isPanning = false;
     this.resizeId = '';
   }
 }
