@@ -99,9 +99,44 @@
 
     &.selected {
         border: 2px solid var(--primary) !important;
-        z-index: 10;
+        z-index: 1000 !important;
+        /* Ensure selected is on top for editing */
         box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
+
+    &.same-color {
+        border: 1px dashed rgba(0, 0, 0, 0.2) !important;
+    }
+
+    &.ant-march {
+        outline: 2px dashed var(--primary) !important;
+        outline-offset: -2px;
+        animation: ant-march 1s infinite linear;
+    }
+}
+
+@keyframes ant-march {
+    from {
+        outline-dash-offset: 0;
+    }
+
+    to {
+        outline-dash-offset: 8;
+    }
+}
+
+/* Standard CSS outline doesn't support offset easily, alternate for borders: */
+.ant-march {
+    border: 2px dashed var(--primary) !important;
+    animation: ant-march-border 1s infinite linear;
+}
+
+@keyframes ant-march-border {
+    from {
+        border-style: dashed;
+    }
+
+    /* We can use background-image trick for better marching ants if needed */
 }
 
 .element-content {
@@ -137,17 +172,63 @@
 
 .resize-handle {
     position: absolute;
-    width: 10px;
-    height: 10px;
+    width: 8px;
+    height: 8px;
     background: white;
-    border: 2px solid var(--primary);
-    z-index: 20;
-}
+    border: 1px solid var(--primary);
+    z-index: 2000;
 
-.bottom-right {
-    bottom: -6px;
-    right: -6px;
-    cursor: nwse-resize;
+    &.n {
+        top: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: ns-resize;
+    }
+
+    &.s {
+        bottom: -4px;
+        left: 50%;
+        transform: translateX(-50%);
+        cursor: ns-resize;
+    }
+
+    &.e {
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: ew-resize;
+    }
+
+    &.w {
+        left: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: ew-resize;
+    }
+
+    &.nw {
+        top: -4px;
+        left: -4px;
+        cursor: nwse-resize;
+    }
+
+    &.ne {
+        top: -4px;
+        right: -4px;
+        cursor: nesw-resize;
+    }
+
+    &.sw {
+        bottom: -4px;
+        left: -4px;
+        cursor: nesw-resize;
+    }
+
+    &.se {
+        bottom: -4px;
+        right: -4px;
+        cursor: nwse-resize;
+    }
 }
 
 .canvas-actions {

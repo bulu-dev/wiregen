@@ -204,6 +204,11 @@
                     <input type="number" [ngModel]="el.styles.gap"
                         (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
                 </div>
+                <div class="field">
+                    <label>Z-Index</label>
+                    <input type="number" [ngModel]="el.styles.zIndex || 0"
+                        (ngModelChange)="editor.updateStyles(el.id, { zIndex: $event })">
+                </div>
             </div>
             }
 

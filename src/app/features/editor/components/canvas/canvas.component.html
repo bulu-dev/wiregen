@@ -88,11 +88,15 @@
                 'padding.px': el.styles.padding,
                 'grid-template-columns': el.type === 'grid' ? el.styles.gridTemplateColumns : 'none',
                 'grid-template-rows': el.type === 'grid' ? el.styles.gridTemplateRows : 'none',
-                'margin.px': el.styles.margin || 0
-            }" (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
+                'margin.px': el.styles.margin || 0,
+                'z-index': el.styles.zIndex || 1
+            }"
+            [class.same-color]="el.parentId && editor.activePage().elements[el.parentId]?.styles?.backgroundColor === el.styles.backgroundColor"
+            [class.ant-march]="activeDropTarget() === el.id"
+            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
             (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
             cdkDrag [cdkDragBoundary]="'.canvas'" (cdkDragEnded)="onDragEnded($event, el.id)"
-            (cdkDragMoved)="onDragMoved($event, el.id)">
+            (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y) || null)">
 
             <!-- Element Handles (Elementor-style) -->
             <div class="element-handle" *ngIf="['section', 'column'].includes(el.type)">
@@ -122,7 +126,14 @@
             </div>
 
             @if (editor.selectedElementId() === el.id) {
-            <div class="resize-handle bottom-right" (mousedown)="startResize($event, el.id)"></div>
+            <div class="resize-handle n" (mousedown)="startResize($event, el.id, 'n')"></div>
+            <div class="resize-handle s" (mousedown)="startResize($event, el.id, 's')"></div>
+            <div class="resize-handle e" (mousedown)="startResize($event, el.id, 'e')"></div>
+            <div class="resize-handle w" (mousedown)="startResize($event, el.id, 'w')"></div>
+            <div class="resize-handle nw" (mousedown)="startResize($event, el.id, 'nw')"></div>
+            <div class="resize-handle ne" (mousedown)="startResize($event, el.id, 'ne')"></div>
+            <div class="resize-handle sw" (mousedown)="startResize($event, el.id, 'sw')"></div>
+            <div class="resize-handle se" (mousedown)="startResize($event, el.id, 'se')"></div>
             }
         </div>
         }

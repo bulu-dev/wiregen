@@ -105,24 +105,6 @@ export class EditorService {
     // Element Management (Scoped to active page)
     addElement(type: ElementType, x: number, y: number, parentId?: string) {
         const id = crypto.randomUUID();
-        const newElement: WireframeElement = {
-            id,
-            type,
-            name: `${type}-${id.slice(0, 4)}`,
-            styles: {
-                width: type === 'section' ? 1440 : (type === 'column' || type === 'article' ? 720 : 150),
-                height: type === 'section' ? 200 : (type === 'text' ? 40 : 100),
-                top: y,
-                left: x,
-                backgroundColor: this.getDefaultColor(type),
-                color: '#000000',
-                borderRadius: 4,
-                padding: 16,
-                display: (type === 'flex' || type === 'grid' || type === 'section' || type === 'column') ? 'flex' : 'block'
-            },
-            content: type === 'text' || type === 'button' ? 'New ' + type : undefined,
-            parentId
-        };
 
         this.project.update(p => {
             const activeIdx = p.pages.findIndex(pg => pg.id === p.activePageId);
@@ -130,8 +112,36 @@ export class EditorService {
 
             const pages = [...p.pages];
             const page = { ...pages[activeIdx] };
+
+            // Calculate max z-index
+            let maxZ = 0;
+            Object.values(page.elements).forEach(el => {
+                if (el.styles.zIndex && el.styles.zIndex > maxZ) maxZ = el.styles.zIndex;
+            });
+
+            const newElement: WireframeElement = {
+                id,
+                type,
+                name: `${type}-${id.slice(0, 4)}`,
+                styles: {
+                    width: type === 'section' ? 1440 : (type === 'column' || type === 'article' ? 720 : 150),
+                    height: type === 'section' ? 200 : (type === 'text' ? 40 : 100),
+                    top: y,
+                    left: x,
+                    backgroundColor: this.getDefaultColor(type),
+                    color: '#333333',
+                    borderRadius: 4,
+                    padding: 16,
+                    zIndex: maxZ + 1,
+                    display: (type === 'flex' || type === 'grid' || type === 'section' || type === 'column') ? 'flex' : 'block'
+                },
+                content: type === 'text' || type === 'button' ? 'New ' + type : undefined,
+                parentId,
+                children: []
+            };
+
             const elements = { ...page.elements, [id]: newElement };
-            const rootElements = parentId ? page.rootElements : [...page.rootElements, id];
+            const rootElements = parentId ? [...page.rootElements] : [...page.rootElements, id];
 
             if (parentId && elements[parentId]) {
                 elements[parentId] = {

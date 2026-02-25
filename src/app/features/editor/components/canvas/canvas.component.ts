@@ -32,8 +32,11 @@ export class CanvasComponent {
   private isResizing = false;
   private isPanning = false;
   private resizeId = '';
+  private resizeDirection = '';
   private lastMouseX = 0;
   private lastMouseY = 0;
+
+  activeDropTarget = signal<string | null>(null);
 
   alignmentGuides = signal<{ id: string, type: 'v' | 'h', pos: number }[]>([]);
 
@@ -60,7 +63,7 @@ export class CanvasComponent {
     this.translateY = 0;
   }
 
-  private findContainerAt(x: number, y: number): string | undefined {
+  public findContainerAt(x: number, y: number): string | undefined {
     const elements = document.elementsFromPoint(x, y);
     for (const el of elements) {
       const id = el.id;
@@ -173,6 +176,7 @@ export class CanvasComponent {
 
       const parentId = this.findContainerAt(event.dropPoint.x, event.dropPoint.y);
       this.editor.addElement(type, x, y, parentId);
+      this.activeDropTarget.set(null);
     }
   }
 
@@ -185,8 +189,9 @@ export class CanvasComponent {
     let newX = (itemRect.left - rect.left) / this.zoom;
     let newY = (itemRect.top - rect.top) / this.zoom;
 
-    // Snapping (Only if ALT is pressed)
-    if (this.isAltPressed() && this.editor.gridSettings().snapEnabled) {
+    // Snapping (Only if ALT is pressed AND NOT NESTED)
+    const el = this.editor.activePage().elements[id];
+    if (this.isAltPressed() && this.editor.gridSettings().snapEnabled && !el?.parentId) {
       newX = this.snap(newX, 8);
       newY = this.snap(newY, 8);
     }
@@ -271,11 +276,12 @@ export class CanvasComponent {
     }
   }
 
-  startResize(event: MouseEvent, id: string) {
+  startResize(event: MouseEvent, id: string, direction: string = 'br') {
     event.stopPropagation();
     event.preventDefault();
     this.isResizing = true;
     this.resizeId = id;
+    this.resizeDirection = direction;
     this.lastMouseX = event.clientX;
     this.lastMouseY = event.clientY;
   }
@@ -288,10 +294,31 @@ export class CanvasComponent {
         const deltaX = (event.clientX - this.lastMouseX) / this.zoom;
         const deltaY = (event.clientY - this.lastMouseY) / this.zoom;
 
-        this.editor.updateStyles(this.resizeId, {
-          width: Math.max(20, el.styles.width + deltaX),
-          height: Math.max(20, el.styles.height + deltaY)
-        });
+        const updates: any = {};
+        const styles = { ...el.styles };
+
+        if (this.resizeDirection.includes('e')) {
+          updates.width = Math.max(20, styles.width + deltaX);
+        }
+        if (this.resizeDirection.includes('w')) {
+          const newWidth = Math.max(20, styles.width - deltaX);
+          if (newWidth !== styles.width) {
+            updates.width = newWidth;
+            updates.left = styles.left + deltaX;
+          }
+        }
+        if (this.resizeDirection.includes('s')) {
+          updates.height = Math.max(20, styles.height + deltaY);
+        }
+        if (this.resizeDirection.includes('n')) {
+          const newHeight = Math.max(20, styles.height - deltaY);
+          if (newHeight !== styles.height) {
+            updates.height = newHeight;
+            updates.top = styles.top + deltaY;
+          }
+        }
+
+        this.editor.updateStyles(this.resizeId, updates);
 
         if (el.parentId) {
           this.editor.updateContainerSize(el.parentId);

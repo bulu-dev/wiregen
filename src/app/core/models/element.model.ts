@@ -22,6 +22,7 @@ export interface ElementStyles {
   gridTemplateRows?: string;
   flexWrap?: string;
   margin?: number;
+  zIndex?: number;
 }
 
 export interface WireframeElement {
