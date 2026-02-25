@@ -148,3 +148,20 @@
         margin: 0;
     }
 }
+
+.properties-footer {
+    padding: 16px;
+    border-top: 1px solid var(--border);
+    background: var(--bg-sidebar);
+
+    .btn-danger {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        .material-icons {
+            font-size: 18px;
+        }
+    }
+}

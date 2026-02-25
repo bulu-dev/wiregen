@@ -212,11 +212,15 @@
             </div>
             }
 
-            <div class="actions">
-                <button class="btn btn-danger btn-full" (click)="editor.deleteElement(el.id)">Delete Element</button>
-            </div>
         </div>
         }
+    </div>
+
+    <div class="properties-footer">
+        <button class="btn btn-danger btn-full" (click)="editor.deleteElement(el.id)">
+            <span class="material-icons">delete</span>
+            Delete Element
+        </button>
     </div>
     } @else {
     <div class="properties-content">
