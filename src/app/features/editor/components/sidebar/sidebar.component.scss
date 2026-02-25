@@ -47,7 +47,7 @@
     }
 
     &.active {
-        background: #eff6ff;
+        background: var(--primary-light);
         color: var(--primary);
         font-weight: 500;
     }
@@ -67,7 +67,7 @@
         border: none;
         cursor: pointer;
         display: flex;
-        color: #ef4444;
+        color: #f87171;
 
         .material-icons {
             font-size: 14px;
@@ -101,12 +101,12 @@
 
     &:hover {
         border-color: var(--primary);
-        background: var(--bg-main);
+        background: var(--primary-light);
     }
 
     .material-icons {
         font-size: 1.25rem;
-        color: #64748b;
+        color: var(--text-muted);
     }
 
     .label {
@@ -119,7 +119,7 @@
 .drag-preview {
     padding: 12px 24px;
     background: var(--primary);
-    color: white;
+    color: var(--text-on-primary);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     display: flex;
@@ -147,7 +147,7 @@
     color: var(--primary);
 
     &:hover {
-        background: #eff6ff;
+        background: var(--primary-light);
     }
 
     .material-icons {

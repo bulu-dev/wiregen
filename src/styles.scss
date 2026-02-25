@@ -1,15 +1,42 @@
 :root {
   --primary: #3b82f6;
   --primary-hover: #2563eb;
+  --primary-light: rgba(59, 130, 246, 0.1);
+
   --bg-main: #f3f4f6;
   --bg-sidebar: #ffffff;
-  --bg-canvas: #ffffff;
+  --bg-canvas: #f8fafc;
+  --bg-canvas-inner: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-input: #ffffff;
+
   --text-main: #1f2937;
   --text-muted: #6b7280;
+  --text-on-primary: #ffffff;
+
   --border: #e5e7eb;
+  --border-strong: #d1d5db;
+
   --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
   --radius: 8px;
   --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body.dark {
+  --bg-main: #0f172a;
+  --bg-sidebar: #1e293b;
+  --bg-canvas: #0f172a;
+  --bg-canvas-inner: #1e293b;
+  --bg-surface: #1e293b;
+  --bg-input: #334155;
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+
+  --border: #334155;
+  --border-strong: #475569;
 }
 
 body {
@@ -20,27 +47,10 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-body.dark {
-  --bg-main: #0f172a;
-  --bg-sidebar: #1e293b;
-  --bg-canvas: #1e293b;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border: #334155;
-  --bg-canvas-inner: #0f172a;
-}
-
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-}
-
-body {
-  font-family: var(--font-family);
-  color: var(--text-main);
-  background-color: var(--bg-main);
-  overflow: hidden;
 }
 
 button {

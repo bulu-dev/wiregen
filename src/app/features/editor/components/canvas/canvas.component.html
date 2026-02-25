@@ -1,4 +1,4 @@
-<main class="canvas-container">
+<main class="canvas-container" [class.panning-mode]="isAltPressed()">
     <div class="canvas-viewport" (wheel)="onWheel($event)" (mousedown)="onMouseDown($event)"
         (click)="onCanvasClick($event)"
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">

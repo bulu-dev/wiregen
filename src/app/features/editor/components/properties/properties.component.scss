@@ -26,8 +26,7 @@
         font-size: 0.7rem;
         padding: 2px 8px;
         background: var(--primary);
-        color: white;
-        border-radius: 10px;
+        color: var(--text-on-primary);
         max-width: 120px;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -58,13 +57,13 @@
 
         &:hover {
             color: var(--text-main);
-            background: rgba(0, 0, 0, 0.02);
+            background: var(--primary-light);
         }
 
         &.active {
             color: var(--primary);
             border-bottom-color: var(--primary);
-            background: rgba(59, 130, 246, 0.05);
+            background: var(--primary-light);
         }
 
         .material-icons {
@@ -115,7 +114,8 @@
         border: 1px solid var(--border);
         border-radius: 4px;
         font-size: 0.875rem;
-        background: white;
+        background: var(--bg-input);
+        color: var(--text-main);
 
         &:focus {
             outline: none;
@@ -136,15 +136,15 @@
 }
 
 .btn-danger {
-    background: #fee2e2;
-    color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
     padding: 10px;
     border-radius: var(--radius);
     font-weight: 500;
     font-size: 0.875rem;
 
     &:hover {
-        background: #fecaca;
+        background: rgba(239, 68, 68, 0.2);
     }
 
     &.btn-full {
