@@ -1,0 +1,38 @@
+export type ElementType = 'text' | 'button' | 'input' | 'rect' | 'image' | 'container';
+
+export interface ElementStyles {
+  width: number;
+  height: number;
+  top: number;
+  left: number;
+  backgroundColor?: string;
+  color?: string;
+  fontSize?: number;
+  borderRadius?: number;
+  borderWidth?: number;
+  borderColor?: string;
+  padding?: number;
+  display?: string;
+  flexDirection?: string;
+  justifyContent?: string;
+  alignItems?: string;
+  gap?: number;
+}
+
+export interface WireframeElement {
+  id: string;
+  type: ElementType;
+  name: string;
+  styles: ElementStyles;
+  content?: string;
+  placeholder?: string;
+  parentId?: string;
+  children?: string[]; // IDs of child elements
+}
+
+export interface WireframeProject {
+  id: string;
+  name: string;
+  elements: Record<string, WireframeElement>;
+  rootElements: string[];
+}
