@@ -1,4 +1,4 @@
-export type ElementType = 'text' | 'button' | 'input' | 'rect' | 'image' | 'container' | 'section' | 'article' | 'grid' | 'flex';
+export type ElementType = 'text' | 'button' | 'input' | 'rect' | 'image' | 'container' | 'section' | 'column' | 'article' | 'grid' | 'flex';
 
 export interface ElementStyles {
   width: number;
@@ -21,6 +21,7 @@ export interface ElementStyles {
   gridTemplateColumns?: string;
   gridTemplateRows?: string;
   flexWrap?: string;
+  margin?: number;
 }
 
 export interface WireframeElement {

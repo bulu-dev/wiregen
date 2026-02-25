@@ -247,9 +247,27 @@ export class CanvasComponent {
     setTimeout(() => canvasEl.classList.remove('boundary-error'), 500);
   }
 
+  showStructurePicker = false;
+
+  onAddStructuredSection(columns: number) {
+    // Determine Y position at the bottom of current elements or at scroll pos
+    const page = this.editor.activePage();
+    let maxY = 0;
+    Object.values(page.elements).forEach(el => {
+      if (el.parentId === undefined) {
+        const bottom = el.styles.top + el.styles.height;
+        if (bottom > maxY) maxY = bottom;
+      }
+    });
+
+    this.editor.addSectionWithStructure(columns, maxY + 20);
+    this.showStructurePicker = false;
+  }
+
   onCanvasClick(event: MouseEvent) {
     if (event.target === event.currentTarget || (event.target as HTMLElement).classList.contains('canvas')) {
       this.editor.selectElement(null);
+      this.showStructurePicker = false;
     }
   }
 

@@ -38,6 +38,44 @@ export class SidebarComponent {
     { type: 'rect', label: 'Rectangle', icon: 'rectangle' },
   ];
 
+  expandedElements = new Set<string>();
+
+  toggleExpand(id: string) {
+    if (this.expandedElements.has(id)) {
+      this.expandedElements.delete(id);
+    } else {
+      this.expandedElements.add(id);
+    }
+  }
+
+  getElementLevel(id: string, elements: Record<string, any>, level = 0): number {
+    const el = elements[id];
+    if (el?.parentId && elements[el.parentId]) {
+      return this.getElementLevel(el.parentId, elements, level + 1);
+    }
+    return level;
+  }
+
+  // Flattened tree for easier template rendering
+  get flattenedNavigator() {
+    const page = this.editor.activePage();
+    const result: any[] = [];
+
+    const traverse = (ids: string[]) => {
+      ids.forEach(id => {
+        const el = page.elements[id];
+        if (!el) return;
+        result.push(el);
+        if (this.expandedElements.has(id) && el.children) {
+          traverse(el.children);
+        }
+      });
+    };
+
+    traverse(page.rootElements);
+    return result;
+  }
+
   addPage() {
     const name = prompt('Page Name:', 'New Page');
     if (name) this.editor.addPage(name);

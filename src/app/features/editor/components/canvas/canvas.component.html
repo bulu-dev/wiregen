@@ -1,5 +1,4 @@
 <main class="canvas-container">
-
     <div class="canvas-viewport" (wheel)="onWheel($event)" (mousedown)="onMouseDown($event)"
         (click)="onCanvasClick($event)"
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
@@ -21,24 +20,49 @@
 
             <!-- Page Elements -->
             @for (elId of editor.activePage().rootElements; track elId) {
-            <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }">
-            </ng-container>
+            <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
             }
 
-            <!-- Context Menu -->
-            @if (showContextMenu) {
-            <div class="context-menu" [style.top.px]="menuPos.y" [style.left.px]="menuPos.x" @fadeIn
-                (click)="$event.stopPropagation()">
-                <button (click)="onDuplicate()">
-                    <span class="material-icons">content_copy</span> Duplicate
-                </button>
-                <button (click)="onDelete()" class="danger">
-                    <span class="material-icons">delete</span> Delete
-                </button>
+            <!-- Canvas Inserter (Bottom) -->
+            <div class="canvas-inserter" (click)="showStructurePicker = !showStructurePicker">
+                <div class="inserter-plus">
+                    <span class="material-icons">add</span>
+                </div>
+                @if (showStructurePicker) {
+                <div class="structure-picker" (click)="$event.stopPropagation()">
+                    <h3>Select your structure</h3>
+                    <div class="structure-grid">
+                        <div class="structure-option" (click)="onAddStructuredSection(1)">
+                            <div class="preview p-1"></div>
+                            <span>1 Column</span>
+                        </div>
+                        <div class="structure-option" (click)="onAddStructuredSection(2)">
+                            <div class="preview p-2"></div>
+                            <span>2 Columns</span>
+                        </div>
+                        <div class="structure-option" (click)="onAddStructuredSection(3)">
+                            <div class="preview p-3"></div>
+                            <span>3 Columns</span>
+                        </div>
+                    </div>
+                </div>
+                }
             </div>
-            }
         </div>
     </div>
+
+    <!-- Context Menu (Portal-like) -->
+    @if (showContextMenu) {
+    <div class="context-menu" [style.top.px]="menuPos.y" [style.left.px]="menuPos.x" @fadeIn
+        (click)="$event.stopPropagation()">
+        <button (click)="onDuplicate()">
+            <span class="material-icons">content_copy</span> Duplicate
+        </button>
+        <button (click)="onDelete()" class="danger">
+            <span class="material-icons">delete</span> Delete
+        </button>
+    </div>
+    }
 
     <ng-template #elementTmpl let-id="id">
         @if (editor.activePage().elements[id]; as el) {
@@ -63,14 +87,20 @@
                 'gap.px': el.styles.gap || 0,
                 'padding.px': el.styles.padding,
                 'grid-template-columns': el.type === 'grid' ? el.styles.gridTemplateColumns : 'none',
-                'grid-template-rows': el.type === 'grid' ? el.styles.gridTemplateRows : 'none'
+                'grid-template-rows': el.type === 'grid' ? el.styles.gridTemplateRows : 'none',
+                'margin.px': el.styles.margin || 0
             }" (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
             (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
             cdkDrag [cdkDragBoundary]="'.canvas'" (cdkDragEnded)="onDragEnded($event, el.id)"
             (cdkDragMoved)="onDragMoved($event, el.id)">
 
+            <!-- Element Handles (Elementor-style) -->
+            <div class="element-handle" *ngIf="['section', 'column'].includes(el.type)">
+                <span class="material-icons">{{ el.type === 'section' ? 'apps' : 'view_column' }}</span>
+            </div>
+
             <div class="element-content"
-                [class.no-pointer]="!['container', 'section', 'article', 'grid', 'flex'].includes(el.type)">
+                [class.no-pointer]="!['container', 'section', 'article', 'grid', 'flex', 'column'].includes(el.type)">
                 @if (el.type === 'text' || el.type === 'button') {
                 {{ el.content }}
                 } @else if (el.type === 'input') {

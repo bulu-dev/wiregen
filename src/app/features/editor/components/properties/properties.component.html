@@ -7,168 +7,221 @@
     </div>
 
     @if (editor.selectedElement(); as el) {
+    <!-- Tabs Header -->
+    <div class="properties-tabs">
+        <button [class.active]="activeTab === 'content'" (click)="activeTab = 'content'">
+            <span class="material-icons">edit</span> Content
+        </button>
+        <button [class.active]="activeTab === 'style'" (click)="activeTab = 'style'">
+            <span class="material-icons">palette</span> Style
+        </button>
+        <button [class.active]="activeTab === 'advanced'" (click)="activeTab = 'advanced'">
+            <span class="material-icons">settings</span> Advanced
+        </button>
+    </div>
+
     <div class="properties-content">
-        <div class="section">
-            <h3>Identity</h3>
-            <div class="field">
-                <label>Name</label>
-                <input type="text" [ngModel]="el.name" (ngModelChange)="editor.updateElement(el.id, { name: $event })">
-                <div class="identity-info">
-                    <span class="identity-badge">{{ el.type }}</span>
-                    <span class="id-text">ID: {{ el.id.slice(0, 8) }}...</span>
+        <!-- Content Tab -->
+        @if (activeTab === 'content') {
+        <div class="tab-pane">
+            <div class="section">
+                <h3>General</h3>
+                <div class="field">
+                    <label>Name</label>
+                    <input type="text" [ngModel]="el.name"
+                        (ngModelChange)="editor.updateElement(el.id, { name: $event })">
                 </div>
             </div>
+
+            @if (el.content !== undefined) {
+            <div class="section">
+                <h3>Text</h3>
+                <div class="field">
+                    <textarea [ngModel]="el.content"
+                        (ngModelChange)="editor.updateElement(el.id, { content: $event })"></textarea>
+                </div>
+            </div>
+            }
+
+            @if (el.type === 'image') {
+            <div class="section">
+                <h3>Image</h3>
+                <div class="field">
+                    <label>Image URL</label>
+                    <input type="text" [ngModel]="el.imageUrl" placeholder="https://..."
+                        (ngModelChange)="editor.updateElement(el.id, { imageUrl: $event })">
+                </div>
+            </div>
+            }
+
+            @if (el.type === 'input') {
+            <div class="section">
+                <h3>Input</h3>
+                <div class="field">
+                    <label>Placeholder</label>
+                    <input type="text" [ngModel]="el.placeholder" placeholder="Enter text..."
+                        (ngModelChange)="editor.updateElement(el.id, { placeholder: $event })">
+                </div>
+            </div>
+            }
         </div>
+        }
 
-        <div class="section">
-            <h3>Layout</h3>
-            <div class="grid">
-                <div class="field">
-                    <label>X (Left)</label>
-                    <input type="number" [ngModel]="el.styles.left"
-                        (ngModelChange)="editor.updateStyles(el.id, { left: $event })">
-                </div>
-                <div class="field">
-                    <label>Y (Top)</label>
-                    <input type="number" [ngModel]="el.styles.top"
-                        (ngModelChange)="editor.updateStyles(el.id, { top: $event })">
-                </div>
-                <div class="field">
-                    <label>Width</label>
-                    <input type="number" [ngModel]="el.styles.width"
-                        (ngModelChange)="editor.updateStyles(el.id, { width: $event })">
-                </div>
-                <div class="field">
-                    <label>Height</label>
-                    <input type="number" [ngModel]="el.styles.height"
-                        (ngModelChange)="editor.updateStyles(el.id, { height: $event })">
-                </div>
-                <div class="field" *ngIf="el.type === 'container' || el.type === 'rect'">
-                    <label>Gap</label>
-                    <input type="number" [ngModel]="el.styles.gap || 0"
-                        (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
-                </div>
-                <div class="field" *ngIf="el.type === 'container' || el.type === 'rect'">
-                    <label>Padding</label>
-                    <input type="number" [ngModel]="el.styles.padding || 0"
-                        (ngModelChange)="editor.updateStyles(el.id, { padding: $event })">
+        <!-- Style Tab -->
+        @if (activeTab === 'style') {
+        <div class="tab-pane">
+            <div class="section">
+                <h3>Dimensions</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Width</label>
+                        <input type="number" [ngModel]="el.styles.width"
+                            (ngModelChange)="editor.updateStyles(el.id, { width: $event })">
+                    </div>
+                    <div class="field">
+                        <label>Height</label>
+                        <input type="number" [ngModel]="el.styles.height"
+                            (ngModelChange)="editor.updateStyles(el.id, { height: $event })">
+                    </div>
                 </div>
             </div>
 
-            <div class="field-group" *ngIf="['container', 'flex', 'grid', 'section', 'article'].includes(el.type)">
-                <label>Flex Distribution</label>
-                <div class="flex-controls">
-                    <select [ngModel]="el.styles.justifyContent || 'flex-start'"
-                        (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
-                        <option value="flex-start">Start</option>
-                        <option value="center">Center</option>
-                        <option value="flex-end">End</option>
-                        <option value="space-between">Between</option>
-                    </select>
-                    <select [ngModel]="el.styles.alignItems || 'stretch'"
-                        (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
-                        <option value="flex-start">Top</option>
-                        <option value="center">Middle</option>
-                        <option value="flex-end">Bottom</option>
-                        <option value="stretch">Stretch</option>
-                    </select>
-                </div>
-                <div class="flex-wrap-ctrl" *ngIf="el.type === 'flex'">
-                    <label class="checkbox-label">
-                        <input type="checkbox" [ngModel]="el.styles.flexWrap === 'wrap'"
-                            (ngModelChange)="editor.updateStyles(el.id, { flexWrap: $event ? 'wrap' : 'nowrap' })">
-                        Flex Wrap
-                    </label>
+            <div class="section">
+                <h3>Colors</h3>
+                <div class="grid">
+                    @if (el.type !== 'text') {
+                    <div class="field">
+                        <label>Background</label>
+                        <input type="color" [ngModel]="el.styles.backgroundColor"
+                            (ngModelChange)="editor.updateStyles(el.id, { backgroundColor: $event })">
+                    </div>
+                    }
+                    <div class="field">
+                        <label>Text Color</label>
+                        <input type="color" [ngModel]="el.styles.color"
+                            (ngModelChange)="editor.updateStyles(el.id, { color: $event })">
+                    </div>
                 </div>
             </div>
 
-            <div class="field-group" *ngIf="el.type === 'grid'">
-                <label>Grid Config (Template Columns)</label>
-                <input type="text" [ngModel]="el.styles.gridTemplateColumns || 'repeat(3, 1fr)'"
-                    (ngModelChange)="editor.updateStyles(el.id, { gridTemplateColumns: $event })"
-                    placeholder="e.g. 1fr 2fr 1fr">
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>Typography</h3>
-            <div class="grid">
-                <div class="field">
-                    <label>Font Size</label>
-                    <input type="number" [ngModel]="el.styles.fontSize || 14"
-                        (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
-                </div>
-                <div class="field">
-                    <label>Weight</label>
-                    <select [ngModel]="el.styles.fontWeight || 400"
-                        (ngModelChange)="editor.updateStyles(el.id, { fontWeight: $event })">
-                        <option value="300">Light</option>
-                        <option value="400">Regular</option>
-                        <option value="500">Medium</option>
-                        <option value="600">Semi Bold</option>
-                        <option value="700">Bold</option>
-                    </select>
+            <div class="section">
+                <h3>Typography</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Size</label>
+                        <input type="number" [ngModel]="el.styles.fontSize"
+                            (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
+                    </div>
+                    <div class="field">
+                        <label>Weight</label>
+                        <select [ngModel]="el.styles.fontWeight"
+                            (ngModelChange)="editor.updateStyles(el.id, { fontWeight: $event })">
+                            <option value="300">Light</option>
+                            <option value="400">Regular</option>
+                            <option value="700">Bold</option>
+                        </select>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="section">
-            <h3>Appearance</h3>
-            <div class="grid">
-                <div class="field" *ngIf="el.type !== 'text'">
-                    <label>Background</label>
-                    <input type="color" [ngModel]="el.styles.backgroundColor"
-                        (ngModelChange)="editor.updateStyles(el.id, { backgroundColor: $event })">
+            <div class="section">
+                <h3>Border</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Width</label>
+                        <input type="number" [ngModel]="el.styles.borderWidth"
+                            (ngModelChange)="editor.updateStyles(el.id, { borderWidth: $event })">
+                    </div>
+                    <div class="field">
+                        <label>Radius</label>
+                        <input type="number" [ngModel]="el.styles.borderRadius"
+                            (ngModelChange)="editor.updateStyles(el.id, { borderRadius: $event })">
+                    </div>
                 </div>
-                <div class="field">
-                    <label>Text Color</label>
-                    <input type="color" [ngModel]="el.styles.color"
-                        (ngModelChange)="editor.updateStyles(el.id, { color: $event })">
-                </div>
-                <div class="field">
-                    <label>Radius</label>
-                    <input type="number" [ngModel]="el.styles.borderRadius || 0"
-                        (ngModelChange)="editor.updateStyles(el.id, { borderRadius: $event })">
-                </div>
-                <div class="field">
-                    <label>Border Width</label>
-                    <input type="number" [ngModel]="el.styles.borderWidth || 0"
-                        (ngModelChange)="editor.updateStyles(el.id, { borderWidth: $event })">
-                </div>
-                <div class="field">
+                <div class="field" *ngIf="el.styles.borderWidth">
                     <label>Border Color</label>
-                    <input type="color" [ngModel]="el.styles.borderColor || '#cccccc'"
+                    <input type="color" [ngModel]="el.styles.borderColor"
                         (ngModelChange)="editor.updateStyles(el.id, { borderColor: $event })">
                 </div>
             </div>
+        </div>
+        }
 
-            <div class="field" *ngIf="el.type === 'image'">
-                <label>Image URL</label>
-                <input type="text" [ngModel]="el.imageUrl" placeholder="https://..."
-                    (ngModelChange)="editor.updateElement(el.id, { imageUrl: $event })">
+        <!-- Advanced Tab -->
+        @if (activeTab === 'advanced') {
+        <div class="tab-pane">
+            <div class="section">
+                <h3>Spacing</h3>
+                <div class="grid">
+                    <div class="field">
+                        <label>Padding</label>
+                        <input type="number" [ngModel]="el.styles.padding"
+                            (ngModelChange)="editor.updateStyles(el.id, { padding: $event })">
+                    </div>
+                    <div class="field">
+                        <label>Margin</label>
+                        <input type="number" [ngModel]="el.styles.margin"
+                            (ngModelChange)="editor.updateStyles(el.id, { margin: $event })">
+                    </div>
+                </div>
             </div>
 
-            <div class="field" *ngIf="el.type === 'input'">
-                <label>Placeholder text</label>
-                <input type="text" [ngModel]="el.placeholder" placeholder="Enter text..."
-                    (ngModelChange)="editor.updateElement(el.id, { placeholder: $event })">
+            @if (['container', 'flex', 'grid', 'section', 'article', 'column'].includes(el.type)) {
+            <div class="section">
+                <h3>Layout Settings</h3>
+                <div class="field">
+                    <label>Direction</label>
+                    <select [ngModel]="el.styles.flexDirection"
+                        (ngModelChange)="editor.updateStyles(el.id, { flexDirection: $event })">
+                        <option value="row">Row</option>
+                        <option value="column">Column</option>
+                    </select>
+                </div>
+                <div class="grid">
+                    <div class="field">
+                        <label>Align</label>
+                        <select [ngModel]="el.styles.alignItems"
+                            (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
+                            <option value="flex-start">Start</option>
+                            <option value="center">Center</option>
+                            <option value="flex-end">End</option>
+                            <option value="stretch">Stretch</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Justify</label>
+                        <select [ngModel]="el.styles.justifyContent"
+                            (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
+                            <option value="flex-start">Start</option>
+                            <option value="center">Center</option>
+                            <option value="flex-end">End</option>
+                            <option value="space-between">Between</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Gap</label>
+                    <input type="number" [ngModel]="el.styles.gap"
+                        (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
+                </div>
             </div>
+            }
 
-            <div class="field" *ngIf="el.content !== undefined">
-                <label>Content</label>
-                <textarea [ngModel]="el.content"
-                    (ngModelChange)="editor.updateElement(el.id, { content: $event })"></textarea>
+            <div class="actions">
+                <button class="btn btn-danger btn-full" (click)="editor.deleteElement(el.id)">Delete Element</button>
             </div>
         </div>
-
-        <div class="actions">
-            <button class="btn btn-danger" (click)="editor.deleteElement(el.id)">Delete Element</button>
-        </div>
+        }
     </div>
     } @else {
     <div class="properties-content">
         <div class="section">
             <h3>Canvas Settings</h3>
+            <div class="field">
+                <label>Page Height</label>
+                <input type="number" [ngModel]="editor.activePage().height"
+                    (ngModelChange)="editor.updatePageHeight(editor.activePage().id, $event)">
+            </div>
             <div class="field">
                 <label class="checkbox-label">
                     <input type="checkbox" [ngModel]="editor.gridSettings().enabled"
@@ -183,28 +236,6 @@
                     Snap to Grid
                 </label>
             </div>
-
-            <div class="grid">
-                <div class="field">
-                    <label>Grid X (Columns)</label>
-                    <input type="number" [ngModel]="editor.gridSettings().sizeX"
-                        (ngModelChange)="editor.updateGridSettings({ sizeX: $event })">
-                </div>
-                <div class="field">
-                    <label>Grid Y (Rows)</label>
-                    <input type="number" [ngModel]="editor.gridSettings().sizeY"
-                        (ngModelChange)="editor.updateGridSettings({ sizeY: $event })">
-                </div>
-                <div class="field">
-                    <label>Page Height (px)</label>
-                    <input type="number" [ngModel]="editor.activePage().height"
-                        (ngModelChange)="editor.updatePageHeight(editor.activePage().id, $event)">
-                </div>
-            </div>
-        </div>
-
-        <div class="empty-state">
-            <p>Select an element to edit its specific properties</p>
         </div>
     </div>
     }

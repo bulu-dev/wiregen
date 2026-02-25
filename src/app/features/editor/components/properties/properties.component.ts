@@ -12,4 +12,5 @@ import { EditorService } from '../../../../core/services/editor.service';
 })
 export class PropertiesComponent {
   editor = inject(EditorService);
+  activeTab: 'content' | 'style' | 'advanced' = 'content';
 }

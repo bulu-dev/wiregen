@@ -110,15 +110,15 @@ export class EditorService {
             type,
             name: `${type}-${id.slice(0, 4)}`,
             styles: {
-                width: type === 'section' || type === 'article' ? 1200 : 150,
-                height: type === 'text' ? 40 : 100,
+                width: type === 'section' ? 1440 : (type === 'column' || type === 'article' ? 720 : 150),
+                height: type === 'section' ? 200 : (type === 'text' ? 40 : 100),
                 top: y,
                 left: x,
                 backgroundColor: this.getDefaultColor(type),
                 color: '#000000',
                 borderRadius: 4,
                 padding: 16,
-                display: (type === 'flex' || type === 'grid' || type === 'section') ? 'flex' : 'block'
+                display: (type === 'flex' || type === 'grid' || type === 'section' || type === 'column') ? 'flex' : 'block'
             },
             content: type === 'text' || type === 'button' ? 'New ' + type : undefined,
             parentId
@@ -148,6 +148,16 @@ export class EditorService {
         });
 
         this.selectedElementId.set(id);
+        return id;
+    }
+
+    addSectionWithStructure(columns: number, y: number) {
+        const sectionId = this.addElement('section', 0, y);
+        const colWidth = 1440 / columns;
+
+        for (let i = 0; i < columns; i++) {
+            this.addElement('column', i * colWidth, 0, sectionId);
+        }
     }
 
     updateElement(id: string, updates: Partial<WireframeElement>) {
@@ -348,7 +358,7 @@ export class EditorService {
         switch (type) {
             case 'button': return '#3b82f6';
             case 'rect': return '#e5e7eb';
-            case 'container':
+            case 'column':
             case 'section':
             case 'article':
             case 'grid':
