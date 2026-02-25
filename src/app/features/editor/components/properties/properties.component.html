@@ -8,15 +8,20 @@
 
     @if (editor.selectedElement(); as el) {
     <!-- Tabs Header -->
-    <div class="properties-tabs">
-        <button [class.active]="activeTab === 'content'" (click)="activeTab = 'content'">
-            <span class="material-icons">edit</span> Content
+    <div class="properties-tabs" role="tablist" aria-label="Element property categories">
+        <button [class.active]="activeTab === 'content'" (click)="activeTab = 'content'" role="tab"
+            [attr.aria-selected]="activeTab === 'content'" aria-controls="content-tab"
+            aria-label="Edit content properties">
+            <span class="material-icons" aria-hidden="true">edit</span> Content
         </button>
-        <button [class.active]="activeTab === 'style'" (click)="activeTab = 'style'">
-            <span class="material-icons">palette</span> Style
+        <button [class.active]="activeTab === 'style'" (click)="activeTab = 'style'" role="tab"
+            [attr.aria-selected]="activeTab === 'style'" aria-controls="style-tab" aria-label="Edit style properties">
+            <span class="material-icons" aria-hidden="true">palette</span> Style
         </button>
-        <button [class.active]="activeTab === 'advanced'" (click)="activeTab = 'advanced'">
-            <span class="material-icons">settings</span> Advanced
+        <button [class.active]="activeTab === 'advanced'" (click)="activeTab = 'advanced'" role="tab"
+            [attr.aria-selected]="activeTab === 'advanced'" aria-controls="advanced-tab"
+            aria-label="Edit advanced properties">
+            <span class="material-icons" aria-hidden="true">settings</span> Advanced
         </button>
     </div>
 
@@ -27,8 +32,8 @@
             <div class="section">
                 <h3>General</h3>
                 <div class="field">
-                    <label>Name</label>
-                    <input type="text" [ngModel]="el.name"
+                    <label for="prop-name">Name</label>
+                    <input id="prop-name" type="text" [ngModel]="el.name"
                         (ngModelChange)="editor.updateElement(el.id, { name: $event })">
                 </div>
             </div>
@@ -37,7 +42,8 @@
             <div class="section">
                 <h3>Text</h3>
                 <div class="field">
-                    <textarea [ngModel]="el.content"
+                    <label for="prop-content" class="sr-only">Content</label>
+                    <textarea id="prop-content" [ngModel]="el.content"
                         (ngModelChange)="editor.updateElement(el.id, { content: $event })"></textarea>
                 </div>
             </div>
@@ -47,8 +53,8 @@
             <div class="section">
                 <h3>Image</h3>
                 <div class="field">
-                    <label>Image URL</label>
-                    <input type="text" [ngModel]="el.imageUrl" placeholder="https://..."
+                    <label for="prop-imageUrl">Image URL</label>
+                    <input id="prop-imageUrl" type="text" [ngModel]="el.imageUrl" placeholder="https://..."
                         (ngModelChange)="editor.updateElement(el.id, { imageUrl: $event })">
                 </div>
             </div>
@@ -58,8 +64,8 @@
             <div class="section">
                 <h3>Input</h3>
                 <div class="field">
-                    <label>Placeholder</label>
-                    <input type="text" [ngModel]="el.placeholder" placeholder="Enter text..."
+                    <label for="prop-placeholder">Placeholder</label>
+                    <input id="prop-placeholder" type="text" [ngModel]="el.placeholder" placeholder="Enter text..."
                         (ngModelChange)="editor.updateElement(el.id, { placeholder: $event })">
                 </div>
             </div>
@@ -74,13 +80,13 @@
                 <h3>Dimensions</h3>
                 <div class="grid">
                     <div class="field">
-                        <label>Width</label>
-                        <input type="number" [ngModel]="el.styles.width"
+                        <label for="prop-width">Width</label>
+                        <input id="prop-width" type="number" [ngModel]="el.styles.width"
                             (ngModelChange)="editor.updateStyles(el.id, { width: $event })">
                     </div>
                     <div class="field">
-                        <label>Height</label>
-                        <input type="number" [ngModel]="el.styles.height"
+                        <label for="prop-height">Height</label>
+                        <input id="prop-height" type="number" [ngModel]="el.styles.height"
                             (ngModelChange)="editor.updateStyles(el.id, { height: $event })">
                     </div>
                 </div>
@@ -91,14 +97,14 @@
                 <div class="grid">
                     @if (el.type !== 'text') {
                     <div class="field">
-                        <label>Background</label>
-                        <input type="color" [ngModel]="el.styles.backgroundColor"
+                        <label for="prop-bg">Background</label>
+                        <input id="prop-bg" type="color" [ngModel]="el.styles.backgroundColor"
                             (ngModelChange)="editor.updateStyles(el.id, { backgroundColor: $event })">
                     </div>
                     }
                     <div class="field">
-                        <label>Text Color</label>
-                        <input type="color" [ngModel]="el.styles.color"
+                        <label for="prop-color">Text Color</label>
+                        <input id="prop-color" type="color" [ngModel]="el.styles.color"
                             (ngModelChange)="editor.updateStyles(el.id, { color: $event })">
                     </div>
                 </div>
@@ -108,13 +114,13 @@
                 <h3>Typography</h3>
                 <div class="grid">
                     <div class="field">
-                        <label>Size</label>
-                        <input type="number" [ngModel]="el.styles.fontSize"
+                        <label for="prop-fontSize">Size</label>
+                        <input id="prop-fontSize" type="number" [ngModel]="el.styles.fontSize"
                             (ngModelChange)="editor.updateStyles(el.id, { fontSize: $event })">
                     </div>
                     <div class="field">
-                        <label>Weight</label>
-                        <select [ngModel]="el.styles.fontWeight"
+                        <label for="prop-fontWeight">Weight</label>
+                        <select id="prop-fontWeight" [ngModel]="el.styles.fontWeight"
                             (ngModelChange)="editor.updateStyles(el.id, { fontWeight: $event })">
                             <option value="300">Light</option>
                             <option value="400">Regular</option>
@@ -128,19 +134,19 @@
                 <h3>Border</h3>
                 <div class="grid">
                     <div class="field">
-                        <label>Width</label>
-                        <input type="number" [ngModel]="el.styles.borderWidth"
+                        <label for="prop-borderWidth">Width</label>
+                        <input id="prop-borderWidth" type="number" [ngModel]="el.styles.borderWidth"
                             (ngModelChange)="editor.updateStyles(el.id, { borderWidth: $event })">
                     </div>
                     <div class="field">
-                        <label>Radius</label>
-                        <input type="number" [ngModel]="el.styles.borderRadius"
+                        <label for="prop-borderRadius">Radius</label>
+                        <input id="prop-borderRadius" type="number" [ngModel]="el.styles.borderRadius"
                             (ngModelChange)="editor.updateStyles(el.id, { borderRadius: $event })">
                     </div>
                 </div>
                 <div class="field" *ngIf="el.styles.borderWidth">
-                    <label>Border Color</label>
-                    <input type="color" [ngModel]="el.styles.borderColor"
+                    <label for="prop-borderColor">Border Color</label>
+                    <input id="prop-borderColor" type="color" [ngModel]="el.styles.borderColor"
                         (ngModelChange)="editor.updateStyles(el.id, { borderColor: $event })">
                 </div>
             </div>
@@ -154,13 +160,13 @@
                 <h3>Spacing</h3>
                 <div class="grid">
                     <div class="field">
-                        <label>Padding</label>
-                        <input type="number" [ngModel]="el.styles.padding"
+                        <label for="prop-padding">Padding</label>
+                        <input id="prop-padding" type="number" [ngModel]="el.styles.padding"
                             (ngModelChange)="editor.updateStyles(el.id, { padding: $event })">
                     </div>
                     <div class="field">
-                        <label>Margin</label>
-                        <input type="number" [ngModel]="el.styles.margin"
+                        <label for="prop-margin">Margin</label>
+                        <input id="prop-margin" type="number" [ngModel]="el.styles.margin"
                             (ngModelChange)="editor.updateStyles(el.id, { margin: $event })">
                     </div>
                 </div>
@@ -170,8 +176,8 @@
             <div class="section">
                 <h3>Layout Settings</h3>
                 <div class="field">
-                    <label>Direction</label>
-                    <select [ngModel]="el.styles.flexDirection"
+                    <label for="prop-flexDir">Direction</label>
+                    <select id="prop-flexDir" [ngModel]="el.styles.flexDirection"
                         (ngModelChange)="editor.updateStyles(el.id, { flexDirection: $event })">
                         <option value="row">Row</option>
                         <option value="column">Column</option>
@@ -179,8 +185,8 @@
                 </div>
                 <div class="grid">
                     <div class="field">
-                        <label>Align</label>
-                        <select [ngModel]="el.styles.alignItems"
+                        <label for="prop-align">Align</label>
+                        <select id="prop-align" [ngModel]="el.styles.alignItems"
                             (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
                             <option value="flex-start">Start</option>
                             <option value="center">Center</option>
@@ -189,8 +195,8 @@
                         </select>
                     </div>
                     <div class="field">
-                        <label>Justify</label>
-                        <select [ngModel]="el.styles.justifyContent"
+                        <label for="prop-justify">Justify</label>
+                        <select id="prop-justify" [ngModel]="el.styles.justifyContent"
                             (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
                             <option value="flex-start">Start</option>
                             <option value="center">Center</option>
@@ -200,13 +206,13 @@
                     </div>
                 </div>
                 <div class="field">
-                    <label>Gap</label>
-                    <input type="number" [ngModel]="el.styles.gap"
+                    <label for="prop-gap">Gap</label>
+                    <input id="prop-gap" type="number" [ngModel]="el.styles.gap"
                         (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
                 </div>
                 <div class="field">
-                    <label>Z-Index</label>
-                    <input type="number" [ngModel]="el.styles.zIndex || 0"
+                    <label for="prop-zIndex">Z-Index</label>
+                    <input id="prop-zIndex" type="number" [ngModel]="el.styles.zIndex || 0"
                         (ngModelChange)="editor.updateStyles(el.id, { zIndex: $event })">
                 </div>
             </div>
@@ -217,8 +223,9 @@
     </div>
 
     <div class="properties-footer">
-        <button class="btn btn-danger btn-full" (click)="editor.deleteElement(el.id)">
-            <span class="material-icons">delete</span>
+        <button class="btn btn-danger btn-full" (click)="editor.deleteElement(el.id)"
+            [attr.aria-label]="'Delete element ' + el.name">
+            <span class="material-icons" aria-hidden="true">delete</span>
             Delete Element
         </button>
     </div>
@@ -227,13 +234,13 @@
         <div class="section">
             <h3>Canvas Settings</h3>
             <div class="field">
-                <label>Page Height</label>
-                <input type="number" [ngModel]="editor.activePage().height"
+                <label for="canvas-height">Page Height</label>
+                <input id="canvas-height" type="number" [ngModel]="editor.activePage().height"
                     (ngModelChange)="editor.updatePageHeight(editor.activePage().id, $event)">
             </div>
             <div class="field">
-                <label class="checkbox-label">
-                    <input type="checkbox" [ngModel]="editor.gridSettings().enabled"
+                <label class="checkbox-label" for="canvas-grid">
+                    <input id="canvas-grid" type="checkbox" [ngModel]="editor.gridSettings().enabled"
                         (ngModelChange)="editor.updateGridSettings({ enabled: $event })">
                     Show Grid
                 </label>

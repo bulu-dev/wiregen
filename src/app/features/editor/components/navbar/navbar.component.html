@@ -4,15 +4,18 @@
     </div>
     <div class="project-info" (click)="onRenameProject()" title="Click to rename project">
         <span class="project-name">{{ editor.project().name }}</span>
-        <span class="material-icons edit-icon">edit</span>
+        <span class="material-icons edit-icon" aria-hidden="true">edit</span>
     </div>
     <div class="actions">
-        <button class="btn btn-icon theme-toggle" (click)="editor.toggleTheme()"
+        <button class="btn btn-icon theme-toggle" (click)="editor.toggleTheme()" aria-label="Toggle theme"
             [title]="'Switch to ' + (editor.theme() === 'light' ? 'dark' : 'light') + ' mode'">
-            <span class="material-icons">{{ editor.theme() === 'light' ? 'dark_mode' : 'light_mode' }}</span>
+            <span class="material-icons" aria-hidden="true">{{ editor.theme() === 'light' ? 'dark_mode' : 'light_mode'
+                }}</span>
         </button>
-        <button class="btn btn-outline" (click)="editor.clearProject()">Clear</button>
-        <button class="btn btn-outline" (click)="exportService.previewProject()">Preview</button>
-        <button class="btn btn-primary" (click)="onExport()">Export</button>
+        <button class="btn btn-outline" (click)="editor.clearProject()"
+            aria-label="Clear all canvas elements">Clear</button>
+        <button class="btn btn-outline" (click)="exportService.previewProject()"
+            aria-label="Preview your project in a new window">Preview</button>
+        <button class="btn btn-primary" (click)="onExport()" aria-label="Export project as HTML/CSS ZIP">Export</button>
     </div>
 </nav>

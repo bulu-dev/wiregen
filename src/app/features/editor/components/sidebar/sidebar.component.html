@@ -3,19 +3,20 @@
     <div class="sidebar-section">
         <div class="section-header">
             <h2>Pages</h2>
-            <button class="btn-icon" (click)="addPage()">
-                <span class="material-icons">add</span>
+            <button class="btn-icon" (click)="addPage()" aria-label="Create new page">
+                <span class="material-icons" aria-hidden="true">add</span>
             </button>
         </div>
         <div class="page-list">
             @for (page of editor.project().pages; track page.id) {
             <div class="page-item" [class.active]="editor.project().activePageId === page.id"
                 (click)="editor.setActivePage(page.id)">
-                <span class="material-icons">description</span>
+                <span class="material-icons" aria-hidden="true">description</span>
                 <span class="label">{{ page.name }}</span>
                 @if (editor.project().pages.length > 1) {
-                <button class="btn-delete" (click)="$event.stopPropagation(); onDeletePage(page.id)">
-                    <span class="material-icons">close</span>
+                <button class="btn-delete" (click)="$event.stopPropagation(); onDeletePage(page.id)"
+                    [attr.aria-label]="'Delete page ' + page.name">
+                    <span class="material-icons" aria-hidden="true">close</span>
                 </button>
                 }
             </div>
@@ -32,10 +33,10 @@
             cdkDropListOrientation="vertical">
             @for (item of structureItems; track item.type) {
             <div class="element-item" cdkDrag [cdkDragData]="item.type">
-                <span class="material-icons">{{ item.icon }}</span>
+                <span class="material-icons" aria-hidden="true">{{ item.icon }}</span>
                 <span class="label">{{ item.label }}</span>
                 <div *cdkDragPreview class="drag-preview">
-                    <span class="material-icons">{{ item.icon }}</span>
+                    <span class="material-icons" aria-hidden="true">{{ item.icon }}</span>
                     <span class="label">{{ item.label }}</span>
                 </div>
             </div>
@@ -52,10 +53,10 @@
             cdkDropListOrientation="vertical">
             @for (item of basicItems; track item.type) {
             <div class="element-item" cdkDrag [cdkDragData]="item.type">
-                <span class="material-icons">{{ item.icon }}</span>
+                <span class="material-icons" aria-hidden="true">{{ item.icon }}</span>
                 <span class="label">{{ item.label }}</span>
                 <div *cdkDragPreview class="drag-preview">
-                    <span class="material-icons">{{ item.icon }}</span>
+                    <span class="material-icons" aria-hidden="true">{{ item.icon }}</span>
                     <span class="label">{{ item.label }}</span>
                 </div>
             </div>
@@ -68,9 +69,9 @@
             <h2>Project</h2>
         </div>
         <div style="padding: 0 16px;">
-            <button class="btn-danger btn-full" (click)="onClearAll()"
+            <button class="btn-danger btn-full" (click)="onClearAll()" aria-label="Clear all data from the project"
                 style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <span class="material-icons">delete_forever</span> Clear All
+                <span class="material-icons" aria-hidden="true">delete_forever</span> Clear All
             </button>
         </div>
     </div>

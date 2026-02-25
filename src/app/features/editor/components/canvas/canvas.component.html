@@ -37,12 +37,12 @@
     <!-- Context Menu (Portal-like) -->
     @if (showContextMenu) {
     <div class="context-menu" [style.top.px]="menuPos.y" [style.left.px]="menuPos.x" @fadeIn
-        (click)="$event.stopPropagation()">
-        <button (click)="onDuplicate()">
-            <span class="material-icons">content_copy</span> Duplicate
+        (click)="$event.stopPropagation()" role="menu" aria-label="Element context menu">
+        <button (click)="onDuplicate()" role="menuitem" aria-label="Duplicate selected element">
+            <span class="material-icons" aria-hidden="true">content_copy</span> Duplicate
         </button>
-        <button (click)="onDelete()" class="danger">
-            <span class="material-icons">delete</span> Delete
+        <button (click)="onDelete()" class="danger" role="menuitem" aria-label="Delete selected element">
+            <span class="material-icons" aria-hidden="true">delete</span> Delete
         </button>
     </div>
     }
@@ -91,7 +91,8 @@
                 @if (el.type === 'text' || el.type === 'button') {
                 {{ el.content }}
                 } @else if (el.type === 'input') {
-                <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled>
+                <input type="text" [placeholder]="el.placeholder || 'Enter text...'" disabled
+                    aria-label="Interactive input placeholder">
                 } @else if (el.type === 'image') {
                 @if (el.imageUrl) {
                 <img [src]="el.imageUrl" style="width: 100%; height: 100%; object-fit: cover;">
@@ -122,9 +123,9 @@
         }
     </ng-template>
 
-    <div class="canvas-actions">
+    <div class="canvas-actions" role="status" aria-live="polite">
         <span>Zoom: {{ (zoom * 100).toFixed(0) }}% | Pan: {{ translateX.toFixed(0) }}, {{ translateY.toFixed(0)
             }}</span>
-        <button class="btn-mini" (click)="resetView()">Reset View</button>
+        <button class="btn-mini" (click)="resetView()" aria-label="Reset canvas zoom and position">Reset View</button>
     </div>
 </main>
