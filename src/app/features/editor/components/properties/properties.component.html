@@ -151,8 +151,41 @@
         </div>
     </div>
     } @else {
-    <div class="empty-state">
-        <p>Select an element to edit its properties</p>
+    <div class="properties-content">
+        <div class="section">
+            <h3>Canvas Settings</h3>
+            <div class="field">
+                <label class="checkbox-label">
+                    <input type="checkbox" [ngModel]="editor.gridSettings().enabled"
+                        (ngModelChange)="editor.updateGridSettings({ enabled: $event })">
+                    Show Grid
+                </label>
+            </div>
+            <div class="field">
+                <label class="checkbox-label">
+                    <input type="checkbox" [ngModel]="editor.gridSettings().snapEnabled"
+                        (ngModelChange)="editor.updateGridSettings({ snapEnabled: $event })">
+                    Snap to Grid
+                </label>
+            </div>
+
+            <div class="grid">
+                <div class="field">
+                    <label>Grid X (Columns)</label>
+                    <input type="number" [ngModel]="editor.gridSettings().sizeX"
+                        (ngModelChange)="editor.updateGridSettings({ sizeX: $event })">
+                </div>
+                <div class="field">
+                    <label>Grid Y (Rows)</label>
+                    <input type="number" [ngModel]="editor.gridSettings().sizeY"
+                        (ngModelChange)="editor.updateGridSettings({ sizeY: $event })">
+                </div>
+            </div>
+        </div>
+
+        <div class="empty-state">
+            <p>Select an element to edit its specific properties</p>
+        </div>
     </div>
     }
 </aside>

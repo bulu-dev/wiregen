@@ -15,8 +15,19 @@ export class EditorService {
         pages: [
             { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [] }
         ],
-        activePageId: '' // Will be set in constructor or first access
+        activePageId: ''
     });
+
+    gridSettings = signal({
+        enabled: true,
+        sizeX: 12,
+        sizeY: 12,
+        snapEnabled: true
+    });
+
+    updateGridSettings(settings: Partial<{ enabled: boolean, sizeX: number, sizeY: number, snapEnabled: boolean }>) {
+        this.gridSettings.update(s => ({ ...s, ...settings }));
+    }
 
     constructor() {
         // Initialize activePageId to the first page if not set
@@ -34,16 +45,15 @@ export class EditorService {
         return p.pages.find(pg => pg.id === p.activePageId) || p.pages[0];
     });
 
+    allElements = computed(() => {
+        return Object.values(this.activePage().elements);
+    });
+
     selectedElement = computed<WireframeElement | null>(() => {
         const id = this.selectedElementId();
         const page = this.activePage();
         if (!id || !page) return null;
         return page.elements[id] || null;
-    });
-
-    allElements = computed<WireframeElement[]>(() => {
-        const page = this.activePage();
-        return page ? Object.values(page.elements) : [];
     });
 
     // Page Management

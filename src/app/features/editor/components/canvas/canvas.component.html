@@ -5,6 +5,20 @@
         [style.transform]="'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + zoom + ')'">
         <div class="canvas" id="canvas-list" cdkDropList [cdkDropListConnectedTo]="[]"
             (cdkDropListDropped)="onDrop($event)">
+
+            <!-- Grid Overlay -->
+            @if (editor.gridSettings().enabled) {
+            <div class="grid-overlay" [style.--grid-x]="editor.gridSettings().sizeX"
+                [style.--grid-y]="editor.gridSettings().sizeY"></div>
+            }
+
+            <!-- Alignment Guides -->
+            @for (guide of alignmentGuides(); track guide.id) {
+            <div class="alignment-guide" [class.vertical]="guide.type === 'v'" [class.horizontal]="guide.type === 'h'"
+                [style.left.px]="guide.type === 'v' ? guide.pos : 0"
+                [style.top.px]="guide.type === 'h' ? guide.pos : 0"></div>
+            }
+
             @for (elId of editor.activePage().rootElements; track elId) {
             <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
             }
@@ -23,7 +37,7 @@
             [style.justify-content]="el.styles.justifyContent" [style.align-items]="el.styles.alignItems"
             [style.gap.px]="el.styles.gap" [style.padding.px]="el.styles.padding"
             (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)" cdkDrag [cdkDragBoundary]="'.canvas'"
-            (cdkDragEnded)="onDragEnded($event, el.id)">
+            (cdkDragEnded)="onDragEnded($event, el.id)" (cdkDragMoved)="onDragMoved($event, el.id)">
 
             <div class="element-content"
                 [class.no-pointer]="!['container', 'section', 'article', 'grid', 'flex'].includes(el.type)">

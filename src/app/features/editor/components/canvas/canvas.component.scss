@@ -11,6 +11,11 @@
     &:active {
         cursor: grabbing;
     }
+
+    &.boundary-error {
+        outline: 2px solid #ef4444 !important;
+        background: rgba(239, 68, 68, 0.05);
+    }
 }
 
 .canvas-viewport {
@@ -31,6 +36,40 @@
     margin-top: 50px;
     margin-bottom: 50px;
     outline: 1px solid var(--border);
+    overflow: hidden;
+
+    .grid-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+        background-size: calc(100% / var(--grid-x)) calc(2000px / var(--grid-y));
+        /* Approximate for preview */
+    }
+}
+
+.alignment-guide {
+    position: absolute;
+    background: var(--primary);
+    z-index: 100;
+    pointer-events: none;
+
+    &.vertical {
+        width: 1px;
+        top: 0;
+        bottom: 0;
+    }
+
+    &.horizontal {
+        height: 1px;
+        left: 0;
+        right: 0;
+    }
 }
 
 .element {

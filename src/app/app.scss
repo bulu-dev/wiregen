@@ -10,4 +10,18 @@
     display: flex;
     flex: 1;
     overflow: hidden;
+    position: relative;
+
+    app-sidebar,
+    app-properties {
+        flex: 0 0 280px;
+        z-index: 10;
+        background: white;
+    }
+
+    app-canvas {
+        flex: 1;
+        background: var(--bg-main);
+        overflow: hidden;
+    }
 }
