@@ -37,8 +37,8 @@ export class CanvasComponent {
   private lastMouseY = 0;
 
   activeDropTarget = signal<string | null>(null);
+  alignmentGuides = signal<{ id: string, type: 'v' | 'h' | 'spacing-v' | 'spacing-h', pos: number, size?: number, label?: string }[]>([]);
 
-  alignmentGuides = signal<{ id: string, type: 'v' | 'h', pos: number }[]>([]);
 
   onWheel(event: WheelEvent) {
     event.preventDefault();
@@ -82,35 +82,83 @@ export class CanvasComponent {
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
     const canvasRect = canvasEl.getBoundingClientRect();
     const itemRect = event.source.element.nativeElement.getBoundingClientRect();
-
-    const guides: { id: string, type: 'v' | 'h', pos: number }[] = [];
     const elements = this.editor.allElements().filter(el => el.id !== id);
 
     const currentX = (itemRect.left - canvasRect.left) / this.zoom;
     const currentY = (itemRect.top - canvasRect.top) / this.zoom;
     const currentW = itemRect.width / this.zoom;
     const currentH = itemRect.height / this.zoom;
+    const currentRight = currentX + currentW;
+    const currentBottom = currentY + currentH;
     const currentMidX = currentX + currentW / 2;
     const currentMidY = currentY + currentH / 2;
 
+    const guides: any[] = [];
     const threshold = 5;
 
     elements.forEach(el => {
-      const elRight = el.styles.left + el.styles.width;
-      const elBottom = el.styles.top + el.styles.height;
-      const elMidX = el.styles.left + el.styles.width / 2;
-      const elMidY = el.styles.top + el.styles.height / 2;
+      const elX = el.styles.left;
+      const elY = el.styles.top;
+      const elW = el.styles.width;
+      const elH = el.styles.height;
+      const elRight = elX + elW;
+      const elBottom = elY + elH;
+      const elMidX = elX + elW / 2;
+      const elMidY = elY + elH / 2;
 
       // Vertical alignment (X)
-      if (Math.abs(el.styles.left - currentX) < threshold) guides.push({ id: `v-${el.id}-ll`, type: 'v', pos: el.styles.left });
-      if (Math.abs(elRight - (currentX + currentW)) < threshold) guides.push({ id: `v-${el.id}-rr`, type: 'v', pos: elRight });
+      if (Math.abs(elX - currentX) < threshold) guides.push({ id: `v-${el.id}-ll`, type: 'v', pos: elX });
+      if (Math.abs(elRight - currentRight) < threshold) guides.push({ id: `v-${el.id}-rr`, type: 'v', pos: elRight });
       if (Math.abs(elMidX - currentMidX) < threshold) guides.push({ id: `v-${el.id}-cc`, type: 'v', pos: elMidX });
+      // Cross alignment
+      if (Math.abs(elRight - currentX) < threshold) guides.push({ id: `vCross-${el.id}-rl`, type: 'v', pos: elRight });
+      if (Math.abs(elX - currentRight) < threshold) guides.push({ id: `vCross-${el.id}-lr`, type: 'v', pos: elX });
 
       // Horizontal alignment (Y)
-      if (Math.abs(el.styles.top - currentY) < threshold) guides.push({ id: `h-${el.id}-tt`, type: 'h', pos: el.styles.top });
-      if (Math.abs(elBottom - (currentY + currentH)) < threshold) guides.push({ id: `h-${el.id}-bb`, type: 'h', pos: elBottom });
+      if (Math.abs(elY - currentY) < threshold) guides.push({ id: `h-${el.id}-tt`, type: 'h', pos: elY });
+      if (Math.abs(elBottom - currentBottom) < threshold) guides.push({ id: `h-${el.id}-bb`, type: 'h', pos: elBottom });
       if (Math.abs(elMidY - currentMidY) < threshold) guides.push({ id: `h-${el.id}-cc`, type: 'h', pos: elMidY });
+      // Cross alignment
+      if (Math.abs(elBottom - currentY) < threshold) guides.push({ id: `hCross-${el.id}-bt`, type: 'h', pos: elBottom });
+      if (Math.abs(elY - currentBottom) < threshold) guides.push({ id: `hCross-${el.id}-tb`, type: 'h', pos: elY });
     });
+
+    // Spacing Guides (Check horizontal/vertical sequences)
+    // Horizontal spacing (leftward neighbor sequence)
+    const leftNeighbors = elements.filter(el => (el.styles.left + el.styles.width) < currentX).sort((a, b) => (b.styles.left + b.styles.width) - (a.styles.left + a.styles.width));
+    if (leftNeighbors.length >= 2) {
+      const b = leftNeighbors[0];
+      const a = leftNeighbors[1];
+      const dist1 = b.styles.left - (a.styles.left + a.styles.width);
+      const dist2 = currentX - (b.styles.left + b.styles.width);
+      if (dist1 > 10 && Math.abs(dist1 - dist2) < threshold) {
+        guides.push({
+          id: `spacing-x-left`,
+          type: 'spacing-h',
+          pos: currentY + currentH / 2,
+          size: dist2,
+          label: Math.round(dist2).toString()
+        });
+      }
+    }
+
+    // Vertical spacing (upward neighbor sequence)
+    const topNeighbors = elements.filter(el => (el.styles.top + el.styles.height) < currentY).sort((a, b) => (b.styles.top + b.styles.height) - (a.styles.top + a.styles.height));
+    if (topNeighbors.length >= 2) {
+      const b = topNeighbors[0];
+      const a = topNeighbors[1];
+      const dist1 = b.styles.top - (a.styles.top + a.styles.height);
+      const dist2 = currentY - (b.styles.top + b.styles.height);
+      if (dist1 > 10 && Math.abs(dist1 - dist2) < threshold) {
+        guides.push({
+          id: `spacing-y-top`,
+          type: 'spacing-v',
+          pos: currentX + currentW / 2,
+          size: dist2,
+          label: Math.round(dist2).toString()
+        });
+      }
+    }
 
     this.alignmentGuides.set(guides);
   }
@@ -140,9 +188,6 @@ export class CanvasComponent {
     if (!event.altKey) this.isAltPressed.set(false);
   }
 
-  private snap(val: number, step: number): number {
-    return Math.round(val / step) * step;
-  }
 
   onDrop(event: any) {
     if (event.previousContainer === event.container) return;
@@ -155,24 +200,12 @@ export class CanvasComponent {
       let x = (event.dropPoint.x - rect.left) / this.zoom;
       let y = (event.dropPoint.y - rect.top) / this.zoom;
 
-      // Snapping (Only if ALT is pressed) - Default to 8px finer grid or use grid settings
-      if (this.isAltPressed() && this.editor.gridSettings().snapEnabled) {
-        x = this.snap(x, 8);
-        y = this.snap(y, 8);
-      } else if (this.editor.gridSettings().snapEnabled && !this.isAltPressed()) {
-        // Normal snapping to major grid if enabled? 
-        // User said: "Smart Snapping: Nur wenn ich mit ALT + Linke Maustaste bewege soll es der Fall sein"
-        // So I will disable standard snapping unless ALT is held? 
-        // Or keep current grid snapping and make ALT "Smart/Fine"? 
-        // User specifically said "Smart Snapping: Only with ALT". 
-        // I will make it so snapping ONLY happens with ALT.
-      }
+      // Strict Boundary Clamping
+      const elWidth = type === 'section' ? 1440 : (type === 'column' || type === 'article' ? 720 : 150); // Default widths from service
+      const elHeight = type === 'section' ? 200 : (type === 'text' ? 40 : 100);
 
-      // Boundary Check
-      if (x < 0 || y < 0 || x > 1440 || y > page.height) {
-        this.showBoundaryError();
-        return;
-      }
+      x = Math.max(0, Math.min(x, 1440 - elWidth));
+      y = Math.max(0, Math.min(y, page.height - elHeight));
 
       const parentId = this.findContainerAt(event.dropPoint.x, event.dropPoint.y);
       this.editor.addElement(type, x, y, parentId);
@@ -184,24 +217,17 @@ export class CanvasComponent {
     const canvasEl = document.querySelector('.canvas') as HTMLElement;
     const rect = canvasEl.getBoundingClientRect();
     const itemRect = event.source.element.nativeElement.getBoundingClientRect();
-    const page = this.editor.activePage();
 
+    const page = this.editor.activePage();
     let newX = (itemRect.left - rect.left) / this.zoom;
     let newY = (itemRect.top - rect.top) / this.zoom;
 
-    // Snapping (Only if ALT is pressed AND NOT NESTED)
-    const el = this.editor.activePage().elements[id];
-    if (this.isAltPressed() && this.editor.gridSettings().snapEnabled && !el?.parentId) {
-      newX = this.snap(newX, 8);
-      newY = this.snap(newY, 8);
-    }
+    // Strict Boundary Clamping
+    const elWidth = itemRect.width / this.zoom;
+    const elHeight = itemRect.height / this.zoom;
 
-    // Boundary Check
-    if (newX < 0 || newY < 0 || newX + (itemRect.width / this.zoom) > 1440 || newY + (itemRect.height / this.zoom) > page.height) {
-      this.showBoundaryError();
-      event.source.reset();
-      return;
-    }
+    newX = Math.max(0, Math.min(newX, 1440 - elWidth));
+    newY = Math.max(0, Math.min(newY, page.height - elHeight));
 
     this.editor.updateStyles(id, { left: newX, top: newY });
 
@@ -246,11 +272,6 @@ export class CanvasComponent {
     this.showContextMenu = false;
   }
 
-  private showBoundaryError() {
-    const canvasEl = document.querySelector('.canvas') as HTMLElement;
-    canvasEl.classList.add('boundary-error');
-    setTimeout(() => canvasEl.classList.remove('boundary-error'), 500);
-  }
 
   onCanvasClick(event: MouseEvent) {
     if (event.target === event.currentTarget || (event.target as HTMLElement).classList.contains('canvas')) {
@@ -279,24 +300,40 @@ export class CanvasComponent {
         const updates: any = {};
         const styles = { ...el.styles };
 
+        const page = this.editor.activePage();
+        const canvasWidth = 1440;
+        const canvasHeight = page.height;
+
         if (this.resizeDirection.includes('e')) {
-          updates.width = Math.max(20, styles.width + deltaX);
+          updates.width = Math.max(10, styles.width + deltaX);
+          // Clamp width so it doesn't exceed right boundary
+          if (styles.left + updates.width > canvasWidth) {
+            updates.width = canvasWidth - styles.left;
+          }
         }
         if (this.resizeDirection.includes('w')) {
-          const newWidth = Math.max(20, styles.width - deltaX);
+          const newWidth = Math.max(10, styles.width - deltaX);
           if (newWidth !== styles.width) {
-            updates.width = newWidth;
-            updates.left = styles.left + deltaX;
+            const newLeft = Math.max(0, styles.left + deltaX);
+            // Re-calculate width based on clamped left
+            updates.left = newLeft;
+            updates.width = styles.width + (styles.left - newLeft);
           }
         }
         if (this.resizeDirection.includes('s')) {
-          updates.height = Math.max(20, styles.height + deltaY);
+          updates.height = Math.max(10, styles.height + deltaY);
+          // Clamp height so it doesn't exceed bottom boundary
+          if (styles.top + updates.height > canvasHeight) {
+            updates.height = canvasHeight - styles.top;
+          }
         }
         if (this.resizeDirection.includes('n')) {
-          const newHeight = Math.max(20, styles.height - deltaY);
+          const newHeight = Math.max(10, styles.height - deltaY);
           if (newHeight !== styles.height) {
-            updates.height = newHeight;
-            updates.top = styles.top + deltaY;
+            const newTop = Math.max(0, styles.top + deltaY);
+            // Re-calculate height based on clamped top
+            updates.top = newTop;
+            updates.height = styles.height + (styles.top - newTop);
           }
         }
 

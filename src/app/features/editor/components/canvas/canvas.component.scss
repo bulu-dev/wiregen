@@ -29,6 +29,8 @@
 
 .canvas {
     width: 1440px;
+    max-width: 1440px;
+    min-width: 1440px;
     min-height: 2000px;
     background: white;
     box-shadow: 0 4px 60px rgba(0, 0, 0, 0.1);
@@ -68,6 +70,55 @@
         height: 1px;
         left: 0;
         right: 0;
+    }
+}
+
+.spacing-guide {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    z-index: 100;
+
+    .spacing-line {
+        background: #ef4444;
+        opacity: 0.6;
+    }
+
+    .spacing-label {
+        position: absolute;
+        background: #ef4444;
+        color: white;
+        font-size: 10px;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-weight: bold;
+        white-space: nowrap;
+    }
+
+    \u0026.h {
+        flex-direction: column;
+
+        .spacing-line {
+            height: 1px;
+        }
+
+        .spacing-label {
+            transform: translateY(-50%);
+        }
+    }
+
+    \u0026.v {
+        flex-direction: row;
+
+        .spacing-line {
+            width: 1px;
+        }
+
+        .spacing-label {
+            transform: translateX(-50%);
+        }
     }
 }
 

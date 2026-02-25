@@ -22,7 +22,7 @@ export class EditorService {
         enabled: true,
         sizeX: 12,
         sizeY: 12,
-        snapEnabled: true
+        snapEnabled: false
     });
 
     updateGridSettings(settings: Partial<{ enabled: boolean, sizeX: number, sizeY: number, snapEnabled: boolean }>) {

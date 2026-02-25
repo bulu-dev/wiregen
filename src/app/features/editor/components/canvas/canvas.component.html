@@ -11,14 +11,23 @@
                 [style.--grid-y]="editor.gridSettings().sizeY"></div>
             }
 
+
             <!-- Alignment Guides -->
             @for (guide of alignmentGuides(); track guide.id) {
+            @if (guide.type === 'v' || guide.type === 'h') {
             <div class="alignment-guide" [class.vertical]="guide.type === 'v'" [class.horizontal]="guide.type === 'h'"
                 [style.left.px]="guide.type === 'v' ? guide.pos : 0"
                 [style.top.px]="guide.type === 'h' ? guide.pos : 0"></div>
+            } @else {
+            <div class="spacing-guide" [class.v]="guide.type === 'spacing-v'" [class.h]="guide.type === 'spacing-h'"
+                [style.left.px]="guide.type === 'spacing-h' ? guide.pos : 0"
+                [style.top.px]="guide.type === 'spacing-v' ? guide.pos : 0">
+                <div class="spacing-line" [style.width.px]="guide.type === 'spacing-h' ? guide.size : 1"
+                    [style.height.px]="guide.type === 'spacing-v' ? guide.size : 1"></div>
+                <span class="spacing-label">{{ guide.label }}</span>
+            </div>
             }
-
-            <!-- Page Elements -->
+            }
             @for (elId of editor.activePage().rootElements; track elId) {
             <ng-container *ngTemplateOutlet="elementTmpl; context: { id: elId }"></ng-container>
             }
@@ -69,7 +78,7 @@
             [class.ant-march]="activeDropTarget() === el.id"
             (mousedown)="$event.stopPropagation(); editor.selectElement(el.id)"
             (click)="editor.selectElement(el.id); $event.stopPropagation()" (contextmenu)="onContextMenu($event, el.id)"
-            cdkDrag [cdkDragBoundary]="'.canvas'" (cdkDragEnded)="onDragEnded($event, el.id)"
+            cdkDrag (cdkDragEnded)="onDragEnded($event, el.id)"
             (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y) || null)">
 
             <!-- Element Handles (Elementor-style) -->
