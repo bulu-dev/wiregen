@@ -17,7 +17,7 @@ export class EditorService {
         id: '1',
         name: 'Untitled Project',
         pages: [
-            { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000 }
+            { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000, lastGrayLevel: 0 }
         ],
         activePageId: ''
     });
@@ -195,7 +195,8 @@ export class EditorService {
             name,
             elements: {},
             rootElements: [],
-            height: 2000
+            height: 2000,
+            lastGrayLevel: 0
         };
         this.project.update(p => ({
             ...p,
@@ -256,7 +257,7 @@ export class EditorService {
                     height: type === 'section' ? 200 : (type === 'text' ? 40 : 100),
                     top: y,
                     left: x,
-                    backgroundColor: this.getDefaultColor(type),
+                    backgroundColor: this.getIncrementalGray(type, page.lastGrayLevel),
                     color: '#333333',
                     borderRadius: 4,
                     padding: 0,
@@ -270,6 +271,11 @@ export class EditorService {
 
             const elements = { ...page.elements, [id]: newElement };
             const rootElements = parentId ? [...page.rootElements] : [...page.rootElements, id];
+
+            // Update gray level for all structural and component types
+            if (['column', 'section', 'article', 'grid', 'flex', 'container', 'button', 'input', 'image', 'rect'].includes(type) || type === 'text') {
+                page.lastGrayLevel++;
+            }
 
             if (parentId && elements[parentId]) {
                 elements[parentId] = {
@@ -389,7 +395,7 @@ export class EditorService {
         this.project.update(p => ({
             ...p,
             pages: [
-                { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000 }
+                { id: crypto.randomUUID(), name: 'Index', elements: {}, rootElements: [], height: 2000, lastGrayLevel: 0 }
             ],
             activePageId: '' // Will be reset
         }));
@@ -496,13 +502,18 @@ export class EditorService {
         switch (type) {
             case 'button': return '#3b82f6';
             case 'rect': return '#e5e7eb';
-            case 'column':
-            case 'section':
-            case 'article':
-            case 'grid':
-            case 'flex': return '#f9fafb';
             case 'input': return '#ffffff';
             default: return 'transparent';
         }
+    }
+
+    private getIncrementalGray(type: ElementType, level: number): string {
+        const structuralTypes = ['column', 'section', 'article', 'grid', 'flex', 'container', 'button', 'input', 'image', 'rect', 'text'];
+        if (structuralTypes.includes(type)) {
+            // Start at 95% lightness, decrease by 3% per level, min 5%
+            const lightness = Math.max(5, 95 - (level * 3));
+            return `hsl(0, 0%, ${lightness}%)`;
+        }
+        return this.getDefaultColor(type);
     }
 }

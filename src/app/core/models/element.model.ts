@@ -43,6 +43,7 @@ export interface WireframePage {
   elements: Record<string, WireframeElement>;
   rootElements: string[];
   height: number;
+  lastGrayLevel: number;
 }
 
 export interface WireframeProject {
