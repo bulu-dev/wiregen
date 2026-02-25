@@ -110,18 +110,36 @@ export class EditorService {
         return page.elements[ids[0]] || null;
     });
 
-    getElementAbsolutePosition(id: string, elements?: Record<string, WireframeElement>): { left: number, top: number } {
+    getElementAbsolutePosition(id: string, elements?: Record<string, WireframeElement>, visited = new Set<string>()): { left: number, top: number } {
         const page = this.activePage();
         const el = (elements || page.elements)[id];
         if (!el) return { left: 0, top: 0 };
 
         if (!el.parentId) return { left: el.styles.left, top: el.styles.top };
 
-        const parentPos = this.getElementAbsolutePosition(el.parentId, elements || page.elements);
+        if (visited.has(id)) {
+            console.warn('Circular reference detected for element:', id);
+            return { left: el.styles.left, top: el.styles.top };
+        }
+        visited.add(id);
+
+        const parentPos = this.getElementAbsolutePosition(el.parentId, elements || page.elements, visited);
         return {
             left: parentPos.left + el.styles.left,
             top: parentPos.top + el.styles.top
         };
+    }
+
+    private isDescendant(childId: string, ancestorId: string, elements: Record<string, WireframeElement>): boolean {
+        let currentId: string | undefined = childId;
+        const visited = new Set<string>();
+        while (currentId) {
+            if (currentId === ancestorId) return true;
+            if (visited.has(currentId)) return false; // Cycle detected
+            visited.add(currentId);
+            currentId = elements[currentId]?.parentId;
+        }
+        return false;
     }
 
     reparentElement(id: string, newParentId?: string, targetAbs?: { left: number, top: number }) {
@@ -133,6 +151,11 @@ export class EditorService {
             const elements = { ...page.elements };
             const el = elements[id];
             if (!el) return p;
+
+            // Prevent reparenting to itself or its descendants to avoid circular references
+            if (newParentId === id || (newParentId && this.isDescendant(newParentId, id, elements))) {
+                newParentId = el.parentId;
+            }
 
             // Use target absolute position or current absolute position
             const absPos = targetAbs || this.getElementAbsolutePosition(id, elements);
