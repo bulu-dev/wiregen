@@ -121,21 +121,53 @@ export class CanvasComponent {
     });
   }
 
+  private getTopLevelSelectedIds(selectedIds: string[]): string[] {
+    const page = this.editor.activePage();
+    return selectedIds.filter(id => {
+      let current = page.elements[id];
+      const visited = new Set<string>();
+      if (current) visited.add(current.id);
+
+      while (current && current.parentId) {
+        if (selectedIds.includes(current.parentId)) {
+          return false;
+        }
+        if (visited.has(current.parentId)) {
+          break; // Avoid infinite loop
+        }
+        visited.add(current.parentId);
+        current = page.elements[current.parentId];
+      }
+      return true;
+    });
+  }
+
   onDragMoved(event: CdkDragMove, id: string) {
     const deltaX = event.distance.x;
     const deltaY = event.distance.y;
 
     const selectedIds = this.editor.selectedElementIds();
     if (selectedIds.includes(id) && selectedIds.length > 1) {
-      // Move all other selected elements by the same delta
+      const topLevelIds = this.getTopLevelSelectedIds(selectedIds);
+
       selectedIds.forEach(selectId => {
-        if (selectId === id) return;
-        const startPos = this.dragStartPositions[selectId];
-        if (startPos) {
-          this.editor.updateStyles(selectId, {
-            left: startPos.left + deltaX,
-            top: startPos.top + deltaY
-          });
+        if (topLevelIds.includes(selectId)) {
+          if (selectId === id) return;
+          const startPos = this.dragStartPositions[selectId];
+          if (startPos) {
+            this.editor.updateStyles(selectId, {
+              left: startPos.left + deltaX,
+              top: startPos.top + deltaY
+            });
+          }
+        } else if (selectId === id) {
+          const startPos = this.dragStartPositions[selectId];
+          if (startPos) {
+            this.editor.updateStyles(selectId, {
+              left: startPos.left - deltaX,
+              top: startPos.top - deltaY
+            });
+          }
         }
       });
     }
@@ -321,8 +353,21 @@ export class CanvasComponent {
     newY = Math.max(0, Math.min(newY, page.height - elHeight));
 
     if (isMultiDrag) {
-      // Finalize all selected elements
-      selectedIds.forEach(selectId => {
+      const topLevelIds = this.getTopLevelSelectedIds(selectedIds);
+
+      // Restore inline styles for any child that was the target of CdkDrag
+      if (!topLevelIds.includes(id)) {
+        const startPos = this.dragStartPositions[id];
+        if (startPos) {
+          this.editor.updateStyles(id, {
+            left: startPos.left,
+            top: startPos.top
+          });
+        }
+      }
+
+      // Finalize all top-level selected elements
+      topLevelIds.forEach(selectId => {
         const selectRect = document.getElementById(selectId)?.getBoundingClientRect();
         if (!selectRect) return;
 
