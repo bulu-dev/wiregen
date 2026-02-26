@@ -2,7 +2,7 @@ import { Component, inject, signal, HostListener, ViewChild, ElementRef } from '
 import { CommonModule } from '@angular/common';
 import { DragDropModule, CdkDragEnd, CdkDragMove } from '@angular/cdk/drag-drop';
 import { EditorService } from '../../../../core/services/editor.service';
-import { ElementType, WireframeElement } from '../../../../core/models/element.model';
+import { ElementType } from '../../../../core/models/element.model';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
