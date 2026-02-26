@@ -1,4 +1,4 @@
-# WireGen
+# WireGen (WP)
 
 WireGen is a simple wireframe editor designed for quickly sketching out web layout ideas. You can place elements on a canvas, customize them, and export the result as a ready-to-use HTML/CSS package.
 
