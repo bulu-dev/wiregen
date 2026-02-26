@@ -83,11 +83,9 @@
                 'z-index': el.styles.zIndex || 1
             }"
             [class.same-color]="el.parentId && editor.activePage().elements[el.parentId]?.styles?.backgroundColor === el.styles.backgroundColor"
-            [class.ant-march]="activeDropTarget() === el.id"
-            (mousedown)="$event.stopPropagation(); editor.selectElement(el.id, $event.shiftKey)"
-            (click)="editor.selectElement(el.id, $event.shiftKey); $event.stopPropagation()"
-            (contextmenu)="onContextMenu($event, el.id)" cdkDrag (cdkDragStarted)="onDragStarted($event, el.id)"
-            (cdkDragEnded)="onDragEnded($event, el.id)"
+            [class.ant-march]="activeDropTarget() === el.id" (mousedown)="onElementMouseDown($event, el.id)"
+            (click)="onElementClick($event, el.id)" (contextmenu)="onContextMenu($event, el.id)" cdkDrag
+            (cdkDragStarted)="onDragStarted($event, el.id)" (cdkDragEnded)="onDragEnded($event, el.id)"
             (cdkDragMoved)="onDragMoved($event, el.id); activeDropTarget.set(findContainerAt($event.pointerPosition.x, $event.pointerPosition.y, el.id) || null)">
 
             <!-- Element Handles (Elementor-style) -->

@@ -37,6 +37,7 @@ export class CanvasComponent {
   private lastMouseX = 0;
   private lastMouseY = 0;
   private dragStartPositions: Record<string, { left: number, top: number }> = {};
+  private hasDragged = false;
 
   // Selection Box state
   isSelecting = signal(false);
@@ -105,18 +106,19 @@ export class CanvasComponent {
   }
 
   onDragStarted(event: any, id: string) {
+    this.hasDragged = true;
     this.dragStartPositions = {};
     const selectedIds = this.editor.selectedElementIds();
 
-    // Only do multi-drag if the dragged item is part of the selection
-    if (selectedIds.includes(id)) {
-      selectedIds.forEach(selectId => {
-        const el = this.editor.activePage().elements[selectId];
-        if (el) {
-          this.dragStartPositions[selectId] = { ...el.styles };
-        }
-      });
+    if (!selectedIds.includes(id)) {
+      this.editor.selectElement(id);
     }
+    selectedIds.forEach(selectId => {
+      const el = this.editor.activePage().elements[selectId];
+      if (el) {
+        this.dragStartPositions[selectId] = { ...el.styles };
+      }
+    });
   }
 
   onDragMoved(event: CdkDragMove, id: string) {
@@ -351,6 +353,7 @@ export class CanvasComponent {
     event.source.reset();
     this.alignmentGuides.set([]);
     this.dragStartPositions = {};
+    setTimeout(() => this.hasDragged = false, 50);
   }
 
   showContextMenu = false;
@@ -399,11 +402,28 @@ export class CanvasComponent {
 
   onCanvasClick(event: MouseEvent) {
     if (this.wasMarqueeSelecting) {
-      this.wasMarqueeSelecting = false;
       return;
     }
     if (event.target === event.currentTarget || (event.target as HTMLElement).classList.contains('canvas')) {
       this.editor.selectElement(null);
+    }
+  }
+
+  onElementMouseDown(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    const isSelected = this.editor.selectedElementIds().includes(id);
+    if (!isSelected || event.shiftKey) {
+      this.editor.selectElement(id, event.shiftKey);
+    }
+  }
+
+  onElementClick(event: MouseEvent, id: string) {
+    event.stopPropagation();
+    if (this.hasDragged || this.wasMarqueeSelecting) return;
+
+    const isSelected = this.editor.selectedElementIds().includes(id);
+    if (isSelected && !event.shiftKey && this.editor.selectedElementIds().length > 1) {
+      this.editor.selectElement(id, false);
     }
   }
 
