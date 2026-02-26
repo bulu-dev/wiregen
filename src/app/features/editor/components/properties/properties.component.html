@@ -110,6 +110,7 @@
                 </div>
             </div>
 
+            @if (['text'].includes(el.type)) {
             <div class="section">
                 <h3>Typography</h3>
                 <div class="grid">
@@ -129,6 +130,7 @@
                     </div>
                 </div>
             </div>
+            }
 
             <div class="section">
                 <h3>Border</h3>
@@ -172,52 +174,14 @@
                 </div>
             </div>
 
-            @if (['container', 'flex', 'grid', 'section', 'article', 'column'].includes(el.type)) {
             <div class="section">
                 <h3>Layout Settings</h3>
-                <div class="field">
-                    <label for="prop-flexDir">Direction</label>
-                    <select id="prop-flexDir" [ngModel]="el.styles.flexDirection"
-                        (ngModelChange)="editor.updateStyles(el.id, { flexDirection: $event })">
-                        <option value="row">Row</option>
-                        <option value="column">Column</option>
-                    </select>
-                </div>
-                <div class="grid">
-                    <div class="field">
-                        <label for="prop-align">Align</label>
-                        <select id="prop-align" [ngModel]="el.styles.alignItems"
-                            (ngModelChange)="editor.updateStyles(el.id, { alignItems: $event })">
-                            <option value="flex-start">Start</option>
-                            <option value="center">Center</option>
-                            <option value="flex-end">End</option>
-                            <option value="stretch">Stretch</option>
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label for="prop-justify">Justify</label>
-                        <select id="prop-justify" [ngModel]="el.styles.justifyContent"
-                            (ngModelChange)="editor.updateStyles(el.id, { justifyContent: $event })">
-                            <option value="flex-start">Start</option>
-                            <option value="center">Center</option>
-                            <option value="flex-end">End</option>
-                            <option value="space-between">Between</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="field">
-                    <label for="prop-gap">Gap</label>
-                    <input id="prop-gap" type="number" [ngModel]="el.styles.gap"
-                        (ngModelChange)="editor.updateStyles(el.id, { gap: $event })">
-                </div>
                 <div class="field">
                     <label for="prop-zIndex">Z-Index</label>
                     <input id="prop-zIndex" type="number" [ngModel]="el.styles.zIndex || 0"
                         (ngModelChange)="editor.updateStyles(el.id, { zIndex: $event })">
                 </div>
             </div>
-            }
-
         </div>
         }
     </div>

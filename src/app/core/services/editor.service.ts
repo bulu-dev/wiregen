@@ -265,12 +265,6 @@ export class EditorService {
             const pages = [...p.pages];
             const page = { ...pages[activeIdx] };
 
-            // Calculate max z-index
-            let maxZ = 0;
-            Object.values(page.elements).forEach(el => {
-                if (el.styles.zIndex && el.styles.zIndex > maxZ) maxZ = el.styles.zIndex;
-            });
-
             const newElement: WireframeElement = {
                 id,
                 type,
@@ -283,8 +277,10 @@ export class EditorService {
                     backgroundColor: this.getIncrementalGray(type, page.lastGrayLevel),
                     color: '#333333',
                     borderRadius: 4,
+                    borderWidth: 1,
                     padding: 0,
-                    zIndex: maxZ + 1,
+                    margin: 0,
+                    zIndex: 1,
                     display: (type === 'flex' || type === 'grid' || type === 'section' || type === 'column') ? 'flex' : 'block'
                 },
                 content: type === 'text' || type === 'button' ? 'New ' + type : undefined,
